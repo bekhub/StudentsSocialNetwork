@@ -1,0 +1,26 @@
+pipelines:
+  default:
+    - step:
+        name: build and publish docker image
+        services:
+          - docker
+        caches:
+          - docker
+        script:
+          - docker build -f Api/Dockerfile -t $HEROKU_APP_NAME .
+          - docker login --username=_ --password=$HEROKU_API_KEY registry.heroku.com
+          - docker tag $HEROKU_APP_NAME registry.heroku.com/$HEROKU_APP_NAME/web
+          - docker push registry.heroku.com/$HEROKU_APP_NAME/web
+          - docker inspect registry.heroku.com/$HEROKU_APP_NAME/web --format={{.Id}} > hub.manas.org/ssnbackend:prod
+        artifacts:
+          - hub.manas.org/ssnbackend:prod
+    - step:
+        name: deploy-to-heroku
+        deployment: staging
+        script:
+          - export hub.manas.org/ssnbackend:prod=$(cat hub.manas.org/ssnbackend:prod)
+          - ./deploy.sh
+          - echo "Done..."
+
+options:
+  docker: true

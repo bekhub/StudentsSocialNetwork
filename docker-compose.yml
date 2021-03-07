@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  ssnbackend:
+    image: ${DOCKER_REGISTRY-}ssnbackend
+    build:
+      context: .
+      dockerfile: SSNBackend/Dockerfile

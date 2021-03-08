@@ -7,7 +7,7 @@ curl -n -X PATCH https://api.heroku.com/apps/$HEROKU_APP_NAME/formation \
   "updates": [
     {
       "type": "web",
-      "docker_image": "'"hub.manas.org/ssnbackend:prod"'"
+      "docker_image": "'"$WEB_DOCKER_IMAGE_ID"'"
     }
   ]
 }' \

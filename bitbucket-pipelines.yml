@@ -1,5 +1,6 @@
 pipelines:
-  default:
+  branches:
+    master:
     - step:
         name: build and publish docker image
         services:
@@ -11,14 +12,14 @@ pipelines:
           - docker login --username=_ --password=$HEROKU_API_KEY registry.heroku.com
           - docker tag $HEROKU_APP_NAME registry.heroku.com/$HEROKU_APP_NAME/web
           - docker push registry.heroku.com/$HEROKU_APP_NAME/web
-          - docker inspect registry.heroku.com/$HEROKU_APP_NAME/web --format={{.Id}} > hub.manas.org/ssnbackend:prod
+          - docker inspect registry.heroku.com/$HEROKU_APP_NAME/web --format={{.Id}} > WEB_DOCKER_IMAGE_ID
         artifacts:
-          - hub.manas.org/ssnbackend:prod
+          - WEB_DOCKER_IMAGE_ID
     - step:
         name: deploy-to-heroku
         deployment: staging
         script:
-          - export hub.manas.org/ssnbackend:prod=$(cat hub.manas.org/ssnbackend:prod)
+          - export WEB_DOCKER_IMAGE_ID=$(cat WEB_DOCKER_IMAGE_ID)
           - ./deploy.sh
           - echo "Done..."
 

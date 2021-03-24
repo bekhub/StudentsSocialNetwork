@@ -1,61 +1,33 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Ardalis.EFCore.Extensions;
-using Core;
+﻿using Ardalis.EFCore.Extensions;
+using Core.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
-    public class SsnDbContext : DbContext
+    public class SsnDbContext : IdentityDbContext<User>
     {
-        private readonly IMediator _mediator;
-        
         public SsnDbContext(DbContextOptions<SsnDbContext> options) : base(options) { }
         
         public SsnDbContext(DbContextOptions<SsnDbContext> options, IMediator mediator)
             : base(options)
-        {
-            _mediator = mediator;
-        }
+        { }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
             
-            modelBuilder.ApplyAllConfigurationsFromCurrentAssembly();
-        }
-        
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
-        {
-            var result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            // ignore events if no dispatcher provided
-            if (_mediator == null) return result;
-
-            // dispatch events only if save was successful
-            var entitiesWithEvents = ChangeTracker.Entries<BaseEntity>()
-                .Select(e => e.Entity)
-                .Where(e => e.Events.Any())
-                .ToArray();
-
-            foreach (var entity in entitiesWithEvents)
-            {
-                var events = entity.Events.ToArray();
-                entity.Events.Clear();
-                foreach (var domainEvent in events)
-                {
-                    await _mediator.Publish(domainEvent, cancellationToken).ConfigureAwait(false);
-                }
-            }
-
-            return result;
-        }
-
-        public override int SaveChanges()
-        {
-            return SaveChangesAsync().GetAwaiter().GetResult();
+            builder.ApplyAllConfigurationsFromCurrentAssembly();
+            
+            builder.Entity<User>(entity => entity.ToTable("Users"));
+            builder.Entity<IdentityRole>(entity => entity.ToTable("Roles"));
+            builder.Entity<IdentityUserRole<string>>(entity => entity.ToTable("UserRoles"));
+            builder.Entity<IdentityUserClaim<string>>(entity => entity.ToTable("UserClaims"));
+            builder.Entity<IdentityUserLogin<string>>(entity => entity.ToTable("UserLogins"));
+            builder.Entity<IdentityRoleClaim<string>>(entity => entity.ToTable("RoleClaims"));
+            builder.Entity<IdentityUserToken<string>>(entity => entity.ToTable("UserTokens"));
         }
     }
 }

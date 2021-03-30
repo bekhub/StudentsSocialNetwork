@@ -8,10 +8,10 @@
       <PackageReference Include="Ardalis.Result" Version="3.1.1" />
       <PackageReference Include="Ardalis.Specification" Version="5.0.3" />
       <PackageReference Include="MediatR" Version="9.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.4" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Entities" />
       <Folder Include="Events" />
       <Folder Include="Handlers" />
       <Folder Include="Services" />

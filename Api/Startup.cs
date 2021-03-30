@@ -1,11 +1,12 @@
+using Api.Configuration;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Infrastructure;
+using Infrastructure.Configuration;
 
 namespace Api
 {
@@ -26,22 +27,11 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options =>
-            {
-                options.AddPolicy(CORS_POLICY, builder =>
-                {
-                    builder.AllowAnyOrigin();
-                    builder.AllowAnyMethod();
-                    builder.AllowAnyHeader();
-                });
-            });
-            services.AddDbContext(Configuration.GetConnectionString("DefaultConnection"));
+            services.AddCorsPolicy(CORS_POLICY);
+            services.AddDbContexts(Configuration.GetConnectionString("DefaultConnection"));
+            services.AddJwtIdentity(Configuration.GetSection(nameof(JwtConfiguration)));
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "SSNBackend", Version = "v1" });
-                c.EnableAnnotations();
-            });
+            services.AddSwagger();
         }
 
         public void ConfigureContainerBuilder(ContainerBuilder builder)
@@ -63,6 +53,8 @@ namespace Api
             
             app.UseHttpsRedirection();
 
+            app.UseStaticFiles();
+
             app.UseRouting();
 
             app.UseCors(CORS_POLICY);
@@ -70,8 +62,7 @@ namespace Api
             app.UseAuthentication();
             app.UseAuthorization();
             
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SSNBackend v1"));
+            app.UseSwaggerConfiguration("SSNBackend v1");
 
             app.UseEndpoints(endpoints =>
             {

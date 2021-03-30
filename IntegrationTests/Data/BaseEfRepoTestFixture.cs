@@ -1,5 +1,6 @@
 ﻿using Core.Interfaces;
 using Infrastructure.Data;
+using Infrastructure.Data.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

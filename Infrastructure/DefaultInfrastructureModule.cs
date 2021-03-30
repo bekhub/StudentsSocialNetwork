@@ -3,7 +3,7 @@ using System.Reflection;
 using Autofac;
 using Core;
 using Core.Interfaces;
-using Infrastructure.Data;
+using Infrastructure.Data.Repositories;
 using MediatR;
 using MediatR.Pipeline;
 using Module = Autofac.Module;
@@ -33,9 +33,6 @@ namespace Infrastructure
 
         private void RegisterCommonDependencies(ContainerBuilder builder)
         {
-            builder.RegisterType(typeof(EfRepository<>)).As(typeof(IRepository<>))
-                .InstancePerLifetimeScope();
-
             builder
                 .RegisterType<Mediator>()
                 .As<IMediator>()

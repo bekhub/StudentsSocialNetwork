@@ -1,15 +1,15 @@
 ﻿using Ardalis.Specification.EntityFrameworkCore;
 using Core.Interfaces;
 
-namespace Infrastructure.Data
+namespace Infrastructure.Data.Repositories
 {
     public class EfRepository<T> : RepositoryBase<T>, IRepository<T> where T : class, IAggregateRoot
     {
-        private readonly SsnDbContext _ssnDbContext;
+        protected readonly SsnDbContext SsnDbContext;
 
         public EfRepository(SsnDbContext ssnDbContext) : base(ssnDbContext)
         {
-            _ssnDbContext = ssnDbContext;
+            SsnDbContext = ssnDbContext;
         }
     }
 }

@@ -7,9 +7,6 @@ namespace Core.Entities
     {
         public string Name { get; set; }
 
-        public int InstituteTypeId { get; set; }
-        public InstituteType InstituteType { get; set; }
-
-        public IEnumerable<Department> Departments { get; set; }
+        public ICollection<Department> Departments { get; set; }
     }
 }

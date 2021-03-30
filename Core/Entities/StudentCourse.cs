@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using System.Collections.Generic;
+using Core.Interfaces;
 
 namespace Core.Entities
 {
@@ -8,16 +9,12 @@ namespace Core.Entities
 
         public int PracticeAbsent { get; set; }
 
-        public int FinalExam { get; set; }
-
-        public int MidtermExam { get; set; }
-        
-        public int? MidtermExam2 { get; set; }
-
         public int StudentId { get; set; }
         public Student Student { get; set; }
 
         public int CourseId { get; set; }
         public Course Course { get; set; }
+
+        public ICollection<Assessment> Assessments { get; set; }
     }
 }

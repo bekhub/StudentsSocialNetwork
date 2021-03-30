@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Infrastructure;
+using Infrastructure.Configuration;
 
 namespace Api
 {
@@ -28,6 +29,7 @@ namespace Api
         {
             services.AddCorsPolicy(CORS_POLICY);
             services.AddDbContexts(Configuration.GetConnectionString("DefaultConnection"));
+            services.AddJwtIdentity(Configuration.GetSection(nameof(JwtConfiguration)));
             services.AddControllers();
             services.AddSwagger();
         }

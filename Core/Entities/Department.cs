@@ -1,4 +1,5 @@
-﻿using Core.Interfaces;
+﻿using System.Collections.Generic;
+using Core.Interfaces;
 
 namespace Core.Entities
 {
@@ -10,5 +11,9 @@ namespace Core.Entities
 
         public int InstituteId { get; set; }
         public Institute Institute { get; set; }
+
+        public ICollection<Student> Students { get; set; }
+
+        public ICollection<Course> Courses { get; set; }
     }
 }

@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using Core.Interfaces;
 
 namespace Core.Entities
 {
-    public class Course : BaseEntity
+    public class Course : BaseEntity, IAggregateRoot
     {
         public string Name { get; set; }
         
@@ -16,16 +17,11 @@ namespace Core.Entities
         
         public int Credits { get; set; }
         
-        public int Year { get; set; }
+        public int? Grade { get; set; }
 
         public int DepartmentId { get; set; }
-        
         public Department Department { get; set; }
 
-        public int CourseTypeId { get; set; }
-
-        public CourseType CourseType { get; set; }
-
-        public IEnumerable<CourseTime> CourseTimes { get; set; }
+        public ICollection<CourseTime> CourseTimes { get; set; }
     }
 }

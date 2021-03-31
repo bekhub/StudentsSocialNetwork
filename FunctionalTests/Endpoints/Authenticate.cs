@@ -22,10 +22,10 @@ namespace FunctionalTests.Endpoints
         }
         
         [Theory]
-        [InlineData("demouser@microsoft.com", AuthorizationConstants.DEFAULT_PASSWORD, "some-token")]
-        [InlineData("demouser@microsoft.com", "badpassword", null)]
-        [InlineData("baduser@microsoft.com", "badpassword", null)]
-        public async Task ReturnsExpectedResultGivenCredentials(string testUsername, string testPassword, object token)
+        [InlineData("demouser@microsoft.com", AuthorizationConstants.DEFAULT_PASSWORD, true)]
+        [InlineData("demouser@microsoft.com", "badpassword", false)]
+        [InlineData("baduser@microsoft.com", "badpassword", false)]
+        public async Task ReturnsExpectedResultGivenCredentials(string testUsername, string testPassword, bool isTokenExist)
         {
             var request = new Request.Authenticate 
             { 
@@ -38,7 +38,7 @@ namespace FunctionalTests.Endpoints
             var stringResponse = await response.Content.ReadAsStringAsync();
             var model = stringResponse.FromJson<Response.Authenticate>();
 
-            Assert.Equal(model.Token.GetType(), token.GetType());
+            Assert.Equal(model.Token != null, isTokenExist);
         }
     }
 }

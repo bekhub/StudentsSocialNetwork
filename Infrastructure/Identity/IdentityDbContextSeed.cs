@@ -10,6 +10,13 @@ namespace Infrastructure.Identity
         public static async Task SeedAsync(UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager)
         {
+            if (!await roleManager.RoleExistsAsync(RoleConstants.ADMINISTRATOR))
+                await roleManager.CreateAsync(new IdentityRole(RoleConstants.ADMINISTRATOR));
+            if (!await roleManager.RoleExistsAsync(RoleConstants.USER))
+                await roleManager.CreateAsync(new IdentityRole(RoleConstants.USER));
+            if (!await roleManager.RoleExistsAsync(RoleConstants.STUDENT))
+                await roleManager.CreateAsync(new IdentityRole(RoleConstants.STUDENT));
+            
             var defaultUserName = "demouser@ssn.com";
             if (await userManager.FindByNameAsync(defaultUserName) == null)
             {

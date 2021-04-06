@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Core.Entities;
 using Core.Interfaces;
@@ -25,7 +26,7 @@ namespace Infrastructure.Identity
             ThrowIfInvalidOptions(_jwtOptions);
         }
 
-        public async Task<string> CreateTokenAsync(string userId, string email, IEnumerable<Claim> additionalClaims)
+        public async Task<string> CreateTokenAsync(string userId, string email, IEnumerable<Claim> additionalClaims = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
             var roles = await _userManager.GetRolesAsync(user);
@@ -38,10 +39,8 @@ namespace Infrastructure.Identity
                     new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(_jwtOptions.IssuedAt).ToUnixTimeSeconds().ToString(), 
                         ClaimValueTypes.Integer64),
                 };
-            claims.AddRange(additionalClaims);
+            claims.AddRange(additionalClaims ?? Array.Empty<Claim>());
             claims.AddRange(roles.Select(x => new Claim(ClaimTypes.Role, x)));
-            
-            _jwtOptions.ValidFor = TimeSpan.FromMinutes(60);
 
             var jwt = new JwtSecurityToken(
                 issuer: _jwtOptions.Issuer,
@@ -56,9 +55,15 @@ namespace Infrastructure.Identity
             return tokenHandler.WriteToken(jwt);
         }
 
-        public Task<string> CreateTokenAsync(string userId, string email)
+        public RefreshToken CreateRefreshToken(string ipAddress)
         {
-            return CreateTokenAsync(userId, email, new List<Claim>());
+            return new()
+            {
+                Token = RandomTokenString(),
+                Expires = DateTime.UtcNow.AddDays(7),
+                Created = DateTime.UtcNow,
+                CreatedByIp = ipAddress,
+            };
         }
 
         private static void ThrowIfInvalidOptions(JwtConfiguration options)
@@ -82,6 +87,15 @@ namespace Infrastructure.Identity
             {
                 throw new ArgumentException(nameof(JwtConfiguration.JtiGenerator));
             }
+        }
+        
+        private static string RandomTokenString()
+        {
+            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            var randomBytes = new byte[40];
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+            // convert random bytes to hex string
+            return BitConverter.ToString(randomBytes).Replace("-", "");
         }
     }
 }

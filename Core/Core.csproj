@@ -12,9 +12,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Events" />
-      <Folder Include="Handlers" />
-      <Folder Include="Services" />
       <Folder Include="Specifications" />
     </ItemGroup>
 

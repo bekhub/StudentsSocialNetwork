@@ -2,8 +2,9 @@
 using System.Reflection;
 using Autofac;
 using Core;
-using Core.Interfaces;
+using Core.Interfaces.Services;
 using Infrastructure.Data.Repositories;
+using Infrastructure.Services;
 using MediatR;
 using MediatR.Pipeline;
 using Module = Autofac.Module;

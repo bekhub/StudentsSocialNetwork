@@ -1,5 +1,6 @@
 ﻿using Ardalis.Specification.EntityFrameworkCore;
 using Core.Interfaces;
+using Core.Interfaces.Repositories;
 
 namespace Infrastructure.Data.Repositories
 {

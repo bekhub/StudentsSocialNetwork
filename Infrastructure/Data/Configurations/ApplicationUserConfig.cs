@@ -8,9 +8,11 @@ namespace Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
-            builder
-                .HasMany(x => x.Students)
+            builder.HasMany(x => x.Students)
                 .WithOne(x => x.User);
+
+            builder.OwnsMany(x => x.RefreshTokens, 
+                o => o.HasKey(x => x.Id));
             
             builder.HasIndex(x => x.UserName)
                 .IsUnique();

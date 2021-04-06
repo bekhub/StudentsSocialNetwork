@@ -16,6 +16,9 @@ namespace Infrastructure.Data.Configurations
                 .IsRequired();
             builder.Property(x => x.UserId)
                 .IsRequired();
+
+            builder.HasIndex(x => x.StudentNumber)
+                .IsUnique();
         }
     }
 }

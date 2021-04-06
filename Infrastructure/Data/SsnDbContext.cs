@@ -29,6 +29,8 @@ namespace Infrastructure.Data
         
         public DbSet<Institute> Institutes { get; set; }
 
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

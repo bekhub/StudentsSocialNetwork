@@ -49,5 +49,10 @@ namespace Infrastructure.Configuration
         /// Gets or sets the signing key to use when generating tokens.
         /// </summary>
         public SigningCredentials SigningCredentials { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the refresh token time to live (in days)
+        /// </summary>
+        public int RefreshTokenTtl { get; set; }
     }
 }

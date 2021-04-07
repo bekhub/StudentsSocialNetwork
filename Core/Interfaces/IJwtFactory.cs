@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Core.Entities;
 
 namespace Core.Interfaces
 {
@@ -9,11 +10,11 @@ namespace Core.Interfaces
         /// <summary>
         /// Creates the jwt token.
         /// </summary>
-        Task<string> CreateTokenAsync(string userId, string email, IEnumerable<Claim> additionalClaims);
+        Task<string> CreateTokenAsync(string userId, string email, IEnumerable<Claim> additionalClaims = default);
         
         /// <summary>
-        /// Creates the jwt token.
+        /// Creates the refresh token.
         /// </summary>
-        Task<string> CreateTokenAsync(string userId, string email);
+        RefreshToken CreateRefreshToken(string ipAddress);
     }
 }

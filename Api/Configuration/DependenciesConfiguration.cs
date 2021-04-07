@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Extensions;
 using Core.Entities;
 using Infrastructure.Configuration;
 using Infrastructure.Data;
@@ -26,7 +27,8 @@ namespace Api.Configuration
                     opts.Password.RequireNonAlphanumeric = false;
                     opts.Password.RequireUppercase = false;
                 })
-                .AddEntityFrameworkStores<SsnDbContext>();
+                .AddEntityFrameworkStores<SsnDbContext>()
+                .AddDefaultTokenProviders();
 
             var signingKey = new SymmetricSecurityKey(
                 Encoding.Default.GetBytes(jwtConfiguration["Secret"]));
@@ -53,7 +55,9 @@ namespace Api.Configuration
             {
                 options.Issuer = jwtConfiguration[nameof(JwtConfiguration.Issuer)];
                 options.Audience = jwtConfiguration[nameof(JwtConfiguration.Audience)];
+                options.ValidFor = TimeSpan.FromMinutes(jwtConfiguration[nameof(JwtConfiguration.ValidFor)].AsInt());
                 options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+                options.RefreshTokenTtl = jwtConfiguration[nameof(JwtConfiguration.RefreshTokenTtl)].AsInt();
             });
 
             services.AddAuthentication(options =>

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Core.Entities;
+using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -24,7 +25,8 @@ namespace Api
                 {
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                    await IdentityDbContextSeed.SeedAsync(userManager, roleManager);
+                    var context = services.GetRequiredService<SsnDbContext>();
+                    await IdentityDbContextSeed.SeedAsync(userManager, roleManager, context);
                 }
                 catch (Exception e)
                 {

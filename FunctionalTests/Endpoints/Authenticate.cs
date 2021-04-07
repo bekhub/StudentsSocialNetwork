@@ -38,7 +38,7 @@ namespace FunctionalTests.Endpoints
             var stringResponse = await response.Content.ReadAsStringAsync();
             var model = stringResponse.FromJson<Response.Authenticate>();
 
-            Assert.Equal(model.Token != null, isTokenExist);
+            Assert.Equal(model.JwtToken != null, isTokenExist);
         }
     }
 }

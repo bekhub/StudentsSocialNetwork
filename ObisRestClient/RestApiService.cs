@@ -21,9 +21,11 @@ namespace ObisRestClient
             _httpService = httpService;
         }
 
-        public Task<Authenticate.Response> AuthenticateAsync(Authenticate.Request request)
+        public async Task<Authenticate.Response> AuthenticateAsync(Authenticate.Request request)
         {
-            return _httpService.PostAsync<Authenticate.Response>(AUTHENTICATE, request);
+            var response = await _httpService.PostAsync<Authenticate.Response>(AUTHENTICATE, request);
+            _httpService.SetAuthKey(response.AuthKey);
+            return response;
         }
 
         public Task<MainInfo.Response> MainInfoAsync()

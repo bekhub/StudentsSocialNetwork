@@ -17,5 +17,7 @@
 
             public string Message { get; set; }
         }
+
+        public record VerifyEmail(bool IsVerified);
     }
 }

@@ -1,8 +1,6 @@
 using System.IO;
 using Api.Configuration;
-using Api.Services;
 using Autofac;
-using Core.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -38,12 +36,11 @@ namespace Api
             services.AddInfrastructureServices(Configuration);
             services.AddObisApiServices(Configuration.GetSection("ObisApiSettings"));
             services.AddJwtIdentity(Configuration.GetSection(nameof(JwtConfiguration)));
-            services.AddControllers();
+            services.AddControllersWithViews();
             services.AddAutoMapper(typeof(Startup).Assembly);
             services.AddSwagger();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddScoped<EmailService>();
-            services.AddScoped<IFileSystem, WebFileSystem>();
+            services.AddServices();
         }
 
         public void ConfigureContainerBuilder(ContainerBuilder builder)

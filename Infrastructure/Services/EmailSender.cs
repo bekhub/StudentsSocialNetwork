@@ -1,32 +1,42 @@
-﻿using System.Net.Mail;
-using System.Threading.Tasks;
-using Core.Interfaces;
+﻿using System.Threading.Tasks;
+using Core.Interfaces.Services;
+using Infrastructure.Configuration;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MimeKit;
+using MimeKit.Text;
 
-namespace Infrastructure
+namespace Infrastructure.Services
 {
     public class EmailSender : IEmailSender
     {
         private readonly ILogger<EmailSender> _logger;
+        private readonly EmailSettings _emailSettings;
 
-        public EmailSender(ILogger<EmailSender> logger)
+        public EmailSender(ILogger<EmailSender> logger, IOptions<EmailSettings> emailSettings)
         {
             _logger = logger;
+            _emailSettings = emailSettings.Value;
         }
         
-        public async Task SendEmailAsync(string to, string from, string subject, string body)
+        public async Task SendEmailAsync(string to, string subject, string body, string from = null)
         {
-            var emailClient = new SmtpClient("localhost");
-            var message = new MailMessage
-            {
-                From = new MailAddress(from),
-                Subject = subject,
-                Body = body,
-            };
-            message.To.Add(new MailAddress(to));
-            await emailClient.SendMailAsync(message);
+            from ??= _emailSettings.EmailFrom;
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(from));
+            email.To.Add(MailboxAddress.Parse(to));
+            email.Subject = subject;
+            email.Body = new TextPart(TextFormat.Html) {Text = body};
+            
+            using var emailClient = new SmtpClient();
+            await emailClient.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, SecureSocketOptions.StartTls);
+            await emailClient.AuthenticateAsync(_emailSettings.SmtpUser, _emailSettings.SmtpPass);
+            await emailClient.SendAsync(email);
             var logMessage = $"Sending email to {to} from {from} with subject {subject}.";
             _logger.LogWarning(logMessage);
+            await emailClient.DisconnectAsync(true);
         }
     }
 }

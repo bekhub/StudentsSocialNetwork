@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Core.Entities;
 
-namespace Core.Interfaces
+namespace Core.Interfaces.Repositories
 {
     public interface IStudentRepository : IRepository<Student>
     {

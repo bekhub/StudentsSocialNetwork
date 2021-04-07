@@ -1,7 +1,6 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Core.Entities;
-using Core.Interfaces;
+using Core.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.Repositories
@@ -12,7 +11,7 @@ namespace Infrastructure.Data.Repositories
 
         public Task<Student> GetByStudentNumberAsync(string studentNumber)
         {
-            return SsnDbContext.Set<Student>()
+            return SsnDbContext.Students
                 .Include(x => x.User)
                 .SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
         }

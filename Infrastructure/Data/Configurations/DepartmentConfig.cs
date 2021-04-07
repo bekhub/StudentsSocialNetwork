@@ -10,6 +10,9 @@ namespace Infrastructure.Data.Configurations
         {
             builder.Property(x => x.Name)
                 .IsRequired();
+
+            builder.HasIndex(x => x.Name)
+                .IsUnique();
         }
     }
 }

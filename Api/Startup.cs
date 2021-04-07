@@ -1,3 +1,4 @@
+using System.IO;
 using Api.Configuration;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Infrastructure;
 using Infrastructure.Configuration;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
+using ObisRestClient;
 
 namespace Api
 {
@@ -29,9 +33,14 @@ namespace Api
         {
             services.AddCorsPolicy(CORS_POLICY);
             services.AddDbContexts(Configuration.GetConnectionString("DefaultConnection"));
+            services.AddInfrastructureServices(Configuration);
+            services.AddObisApiServices(Configuration.GetSection("ObisApiSettings"));
             services.AddJwtIdentity(Configuration.GetSection(nameof(JwtConfiguration)));
-            services.AddControllers();
+            services.AddControllersWithViews();
+            services.AddAutoMapper(typeof(Startup).Assembly);
             services.AddSwagger();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddServices();
         }
 
         public void ConfigureContainerBuilder(ContainerBuilder builder)
@@ -53,7 +62,16 @@ namespace Api
             
             app.UseHttpsRedirection();
 
-            app.UseStaticFiles();
+            const string cacheMaxAge = "604800";
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.ContentRootPath, "wwwroot")),
+                RequestPath = "/static",
+                OnPrepareResponse = ctx =>
+                    ctx.Context.Response.Headers.Append(
+                        "Cache-Control", $"public, max-age={cacheMaxAge}"),
+            });
 
             app.UseRouting();
 

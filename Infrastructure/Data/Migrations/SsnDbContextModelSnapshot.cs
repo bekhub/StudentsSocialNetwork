@@ -218,6 +218,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("InstituteId");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Departments");
                 });
 
@@ -234,6 +237,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Institutes");
                 });
 
@@ -247,6 +253,9 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int?>("AdmissionYear")
                         .HasColumnType("integer");
 
+                    b.Property<string>("AuthKey")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -255,6 +264,12 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Firstname")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Lastname")
+                        .HasColumnType("text");
 
                     b.Property<string>("StudentEmail")
                         .IsRequired()
@@ -269,12 +284,14 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("StudentNumber")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -439,6 +456,55 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("UserTokens");
                 });
 
+            modelBuilder.Entity("Core.Entities.ApplicationUser", b =>
+                {
+                    b.OwnsMany("Core.Entities.RefreshToken", "RefreshTokens", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                            b1.Property<DateTime>("Created")
+                                .HasColumnType("timestamp without time zone");
+
+                            b1.Property<string>("CreatedByIp")
+                                .HasColumnType("text");
+
+                            b1.Property<DateTime>("Expires")
+                                .HasColumnType("timestamp without time zone");
+
+                            b1.Property<string>("ReplacedByToken")
+                                .HasColumnType("text");
+
+                            b1.Property<DateTime?>("Revoked")
+                                .HasColumnType("timestamp without time zone");
+
+                            b1.Property<string>("RevokedByIp")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Token")
+                                .HasColumnType("text");
+
+                            b1.Property<string>("UserId")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("UserId");
+
+                            b1.ToTable("RefreshTokens");
+
+                            b1.WithOwner("User")
+                                .HasForeignKey("UserId");
+
+                            b1.Navigation("User");
+                        });
+
+                    b.Navigation("RefreshTokens");
+                });
+
             modelBuilder.Entity("Core.Entities.Assessment", b =>
                 {
                     b.HasOne("Core.Entities.StudentCourse", "StudentCourse")
@@ -493,9 +559,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasOne("Core.Entities.ApplicationUser", "User")
                         .WithMany("Students")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Department");
 

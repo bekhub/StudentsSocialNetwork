@@ -38,4 +38,8 @@
     <Folder Include="wwwroot\images" />
   </ItemGroup>
 
+  <Target Name="CreateStaticFilesFolder" AfterTargets="AfterPublish">
+    <MakeDir Directories="$(PublishDir)wwwroot/images" Condition="!Exists('$(PublishDir)wwwroot/images')" />
+  </Target>
+
 </Project>

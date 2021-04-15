@@ -28,12 +28,12 @@ namespace Api.Endpoints.Auth
             Summary = "Resend confirmation email",
             Description = "Resend confirmation email",
             OperationId = "auth.resendConfirmationEmail",
-            Tags = new[] { "AuthEndpoints" })]
+            Tags = new[] { "Auth.SignUp" })]
         public override async Task<ActionResult> HandleAsync(string email, 
             CancellationToken cancellationToken = new())
         {
             if (string.IsNullOrEmpty(email)) return BadRequest(Result.EmailRequired);
-            var origin = Request.Headers["origin"];
+            var origin = Request.Host.Value;
 
             var user = await _userManager.FindByEmailAsync(email);
 

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Common.Extensions;
 using Core.Entities;
 using Core.Interfaces.Services;
 using Core.ObisApiModels;
@@ -22,6 +25,16 @@ namespace Api.Services
             _encryptionService = encryptionService;
         }
 
+        public async Task<bool> CheckStudentAsync(string studentNumber, string studentPassword)
+        {
+            var response = await _restApiService.AuthenticateAsync(new Authenticate.Request
+            {
+                Number = studentNumber,
+                Password = studentPassword,
+            });
+            return response != null && !string.IsNullOrEmpty(response.AuthKey);
+        }
+
         public async Task<Student> GetStudentAsync(string studentNumber)
         {
             return await _context.Students.SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
@@ -32,6 +45,12 @@ namespace Api.Services
             var student = await _context.Students.SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
             if (student?.UserId != null) return null;
             return student ?? await BuildStudentAsync(studentNumber, studentPassword);
+        }
+
+        public async Task SaveStudentAsync(string studentNumber, string studentPassword)
+        {
+            await _context.Students.AddAsync(await BuildStudentAsync(studentNumber, studentPassword));
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Student> BuildStudentAsync(string studentNumber, string studentPassword)
@@ -83,7 +102,78 @@ namespace Api.Services
             };
         }
 
-        private string GetStudentEmail(string studentNumber)
+        public Task UpdateStudentInfo(string studentNumber)
+        {
+            return Task.CompletedTask;
+        }
+
+        public async Task SynchronizeStudentAccount(string studentNumber)
+        {
+            var student = await _context.Students.SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
+            if (student == null) return;
+            var studentPassword = await _encryptionService.DecryptAsync(student.StudentPassword);
+            var response = await _restApiService.AuthenticateAsync(new Authenticate.Request
+            {
+                Number = studentNumber,
+                Password = studentPassword,
+            });
+            student.AuthKey = response.AuthKey;
+            var takenLessons = await _restApiService.StudentTakenLessonsAsync();
+            var semesterNotes = await _restApiService.StudentSemesterNotesAsync();
+            
+        }
+
+        private async Task<List<StudentCourse>> GetStudentCoursesAsync(List<StudentTakenLessons.Response> models, Student student)
+        {
+            models.ForEach(x =>
+            {
+                
+            });
+            foreach (var model in models)
+            {
+                var course = await GetCourseAsync(model);
+            }
+            return _context.StudentCourses.ToList();
+        }
+
+        private async Task<StudentCourse> GetStudentCourse(StudentTakenLessons.Response model, int studentId)
+        {
+            var course = await GetCourseAsync(model);
+            return await _context.StudentCourses
+                .FirstOrDefaultAsync(x =>
+                    x.CourseId == course.Id &&
+                    x.StudentId == studentId &&
+                    x.IsActive) ?? 
+                   new StudentCourse
+                   {
+                       TheoryAbsent = model.TheoryAbsent.AsInt(),
+                       PracticeAbsent = model.PracticeAbsent.AsInt(),
+                       AcademicYear = StudentCourse.CurrentAcademicYear,
+                       Semester = StudentCourse.CurrentSemester,
+                       Course = course,
+                   };
+        }
+
+        private Task<List<Assessment>> GetAssessmentsAsync(StudentSemesterNotes.Response model)
+        {
+            return null;
+        }
+
+        private async Task<Course> GetCourseAsync(StudentTakenLessons.Response model)
+        {
+            return await _context.Courses
+                       .FirstOrDefaultAsync(x => x.Code == model.Code && x.Name == model.Name) ?? 
+                   new Course
+                   {
+                       Code = model.Code,
+                       Name = model.Name,
+                       Credits = model.Credit.AsInt(),
+                       Practice = model.Practice.AsInt(),
+                       Theory = model.Theory.AsInt(),
+                   };
+        }
+
+        private static string GetStudentEmail(string studentNumber)
         {
             return $"{studentNumber}@manas.edu.kg";
         }

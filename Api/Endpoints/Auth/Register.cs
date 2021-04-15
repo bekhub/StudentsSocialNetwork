@@ -47,11 +47,11 @@ namespace Api.Endpoints.Auth
             Summary = "Registers a user",
             Description = "Registers a user",
             OperationId = "auth.signUp",
-            Tags = new[] { "AuthEndpoints" })]
+            Tags = new[] { "Auth.SignUp" })]
         public override async Task<ActionResult> HandleAsync([FromForm] Request.Register request, 
             CancellationToken cancellationToken = new())
         {
-            var origin = Request.Headers["origin"];
+            var origin = Request.Host.Value;
             var student = await _studentsService.GetStudentAsync(request.StudentNumber);
             if (await _userManager.FindByEmailAsync(request.Email) != null ||
                 await _userManager.FindByNameAsync(request.Username) != null ||

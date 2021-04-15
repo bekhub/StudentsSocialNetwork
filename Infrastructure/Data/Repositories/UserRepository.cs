@@ -17,11 +17,11 @@ namespace Infrastructure.Data.Repositories
             _userManager = userManager;
         }
 
-        public async Task<(ApplicationUser, RefreshToken)> GetByRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
+        public async Task<(ApplicationUser, RefreshToken)> GetByActiveRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
         {
             var user = await SsnDbContext.Users
                 .SingleOrDefaultAsync(x => 
-                    x.RefreshTokens.Any(z => z.Token == token), cancellationToken);
+                    x.RefreshTokens.Any(z => z.IsActive && z.Token == token), cancellationToken);
             var refreshToken = user?.RefreshTokens.Single(x => x.Token == token);
             return (user, refreshToken);
         }

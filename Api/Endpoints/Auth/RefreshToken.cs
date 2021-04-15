@@ -35,12 +35,12 @@ namespace Api.Endpoints.Auth
             Summary = "Refreshes access token",
             Description = "Provide refresh token",
             OperationId = "auth.refreshToken",
-            Tags = new[] { "AuthEndpoints" })]
+            Tags = new[] { "Auth.SignIn" })]
         public override async Task<ActionResult<Response.Authenticate>> HandleAsync(string token, 
             CancellationToken cancellationToken = new())
         {
             if (string.IsNullOrEmpty(token)) return BadRequest("Token is required");
-            var (user, refreshToken) = await _userRepository.GetByRefreshTokenAsync(token, cancellationToken);
+            var (user, refreshToken) = await _userRepository.GetByActiveRefreshTokenAsync(token, cancellationToken);
             if (user == null) return Unauthorized("Invalid token");
 
             var ipAddress = _userAccessor.GetIpAddress();

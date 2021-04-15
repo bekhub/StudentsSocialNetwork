@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Api.Configuration;
 using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,8 +32,13 @@ namespace Api.Controllers
             return Ok(new
             {
                 IpAddress = _userAccessor.GetIpAddress(),
-                Origin = Request.Headers["origin"],
+                Request.Headers,
+                Request.Cookies,
             });
         }
+
+        [JwtAuthorize]
+        [HttpGet("/protected-route")]
+        public ActionResult<object> ProtectedRoute() => Ok(new { message = "Success" });
     }
 }

@@ -8,9 +8,7 @@ namespace Core.Entities
         public string Name { get; set; }
         
         public string Code { get; set; }
-        
-        public int Semester { get; set; }
-        
+
         public int Theory { get; set; }
         
         public int Practice { get; set; }
@@ -19,9 +17,12 @@ namespace Core.Entities
         
         public int? Grade { get; set; }
 
-        public int DepartmentId { get; set; }
+        public int? DepartmentId { get; set; }
         public Department Department { get; set; }
 
         public ICollection<CourseTime> CourseTimes { get; set; }
+
+        public ICollection<Student> Students { get; set; }
+        public List<StudentCourse> StudentCourses { get; set; }
     }
 }

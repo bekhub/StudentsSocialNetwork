@@ -22,10 +22,6 @@ namespace ObisRestClient
         public async Task<T> GetAsync<T>(string uri)
             where T : class
         {
-            if (!_httpClient.DefaultRequestHeaders.Contains("Authorization"))
-            {
-                
-            }
             var result = await _httpClient.GetAsync(uri);
             if (!result.IsSuccessStatusCode)
             {

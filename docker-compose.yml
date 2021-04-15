@@ -13,3 +13,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Prod
       - DOTNET_ENVIRONMENT=Prod
+    volumes:
+      - static_files: /app/wwwroot
+    
+volumes:
+  static_files:

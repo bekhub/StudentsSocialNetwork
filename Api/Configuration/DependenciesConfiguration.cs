@@ -7,6 +7,7 @@ using Core.Entities;
 using Infrastructure.Configuration;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,57 +33,66 @@ namespace Api.Configuration
 
             var signingKey = new SymmetricSecurityKey(
                 Encoding.Default.GetBytes(jwtConfiguration["Secret"]));
+            var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            var issuer = jwtConfiguration[nameof(JwtConfiguration.Issuer)];
+            var audience = jwtConfiguration[nameof(JwtConfiguration.Audience)];
+            var validFor = TimeSpan.FromMinutes(jwtConfiguration[nameof(JwtConfiguration.ValidFor)].AsInt());
+            var refreshTokenTtl = jwtConfiguration[nameof(JwtConfiguration.RefreshTokenTtl)].AsInt();
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = jwtConfiguration[nameof(JwtConfiguration.Issuer)],
+                ValidIssuer = issuer,
 
                 ValidateAudience = true,
-                ValidAudience = jwtConfiguration[nameof(JwtConfiguration.Audience)],
+                ValidAudience = audience,
 
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = signingKey,
+                IssuerSigningKey = signingCredentials.Key,
 
-                RequireExpirationTime = false,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
             };
 
             services.Configure<JwtConfiguration>(options =>
             {
-                options.Issuer = jwtConfiguration[nameof(JwtConfiguration.Issuer)];
-                options.Audience = jwtConfiguration[nameof(JwtConfiguration.Audience)];
-                options.ValidFor = TimeSpan.FromMinutes(jwtConfiguration[nameof(JwtConfiguration.ValidFor)].AsInt());
-                options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-                options.RefreshTokenTtl = jwtConfiguration[nameof(JwtConfiguration.RefreshTokenTtl)].AsInt();
+                options.Issuer = issuer;
+                options.Audience = audience;
+                options.ValidFor = validFor;
+                options.SigningCredentials = signingCredentials;
+                options.RefreshTokenTtl = refreshTokenTtl;
             });
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(configureOptions =>
-            {
-                configureOptions.ClaimsIssuer = jwtConfiguration[nameof(JwtConfiguration.Issuer)];
-                configureOptions.TokenValidationParameters = tokenValidationParameters;
-                configureOptions.SaveToken = true;
-                configureOptions.Events = new JwtBearerEvents
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(configureOptions =>
                 {
-                    OnMessageReceived = context =>
+                    configureOptions.ClaimsIssuer = issuer;
+                    configureOptions.TokenValidationParameters = tokenValidationParameters;
+                    configureOptions.SaveToken = true;
+                    configureOptions.Events = new JwtBearerEvents
                     {
-                        // This is to enable parsing the token from an authorization header in the format 'Token {token}'
-                        var token = context.HttpContext.Request.Headers["Authorization"];
-                        if (token.Count > 0 && token[0].StartsWith("Token ", StringComparison.OrdinalIgnoreCase))
+                        OnMessageReceived = context =>
                         {
-                            context.Token = token[0].Substring("Token ".Length).Trim();
-                        }
+                            // This is to enable parsing the token from an authorization header in the format 'Token {token}'
+                            var token = context.HttpContext.Request.Headers["Authorization"];
+                            if (token.Count > 0 && token[0].StartsWith("Token ", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Token = token[0]["Token ".Length..].Trim();
+                            }
 
-                        return Task.CompletedTask;
-                    },
-                };
-            });
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                                context.Response.Headers.Add("Token-Expired", "true");
+                            
+                            return Task.CompletedTask;
+                        },
+                    };
+                });
         }
 
         public static void AddCorsPolicy(this IServiceCollection services, string corsPolicy)
@@ -97,7 +107,7 @@ namespace Api.Configuration
                 });
             });
         }
-        
+
         public static void AddSwagger(this IServiceCollection services)
         {
             services.AddSwaggerGen(setup =>
@@ -110,13 +120,13 @@ namespace Api.Configuration
                     Type = SecuritySchemeType.ApiKey,
                     BearerFormat = "JWT",
                 });
-                
+
                 var scheme = new OpenApiSecurityScheme
                 {
-                    Reference = new OpenApiReference 
-                    { 
+                    Reference = new OpenApiReference
+                    {
                         Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer", 
+                        Id = "Bearer",
                     },
                 };
 
@@ -124,7 +134,7 @@ namespace Api.Configuration
                 {
                     [scheme] = Array.Empty<string>(),
                 });
-                
+
                 setup.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "SSNBackend API",

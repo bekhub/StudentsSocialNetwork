@@ -26,7 +26,7 @@ namespace Api.Endpoints.Auth
             Summary = "Verifies email",
             Description = "Verifies email",
             OperationId = "auth.verifyEmail",
-            Tags = new[] { "AuthEndpoints" })]
+            Tags = new[] { "Auth.SignUp" })]
         public override async Task<ActionResult<Response.VerifyEmail>> HandleAsync([FromQuery] Request.VerifyEmail request,
             CancellationToken cancellationToken = new())
         {

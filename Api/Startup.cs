@@ -1,6 +1,7 @@
 using System.IO;
 using Api.Configuration;
 using Autofac;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -31,13 +32,16 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var currentAssembly = typeof(Startup).Assembly;
             services.AddCorsPolicy(CORS_POLICY);
             services.AddDbContexts(Configuration.GetConnectionString("DefaultConnection"));
             services.AddInfrastructureServices(Configuration);
-            services.AddObisApiServices(Configuration.GetSection("ObisApiSettings"));
+            services.AddObisApiServices(Configuration.GetSection(nameof(ObisApiSettings)));
             services.AddJwtIdentity(Configuration.GetSection(nameof(JwtConfiguration)));
-            services.AddControllersWithViews();
-            services.AddAutoMapper(typeof(Startup).Assembly);
+            services.AddMvc()
+                .AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true)
+                .AddFluentValidation(configuration => configuration.RegisterValidatorsFromAssembly(currentAssembly));
+            services.AddAutoMapper(currentAssembly);
             services.AddSwagger();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddServices();
@@ -62,6 +66,13 @@ namespace Api
             
             app.UseHttpsRedirection();
 
+            app.UseRouting();
+
+            app.UseCors(CORS_POLICY);
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+            
             const string cacheMaxAge = "604800";
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -72,13 +83,6 @@ namespace Api
                     ctx.Context.Response.Headers.Append(
                         "Cache-Control", $"public, max-age={cacheMaxAge}"),
             });
-
-            app.UseRouting();
-
-            app.UseCors(CORS_POLICY);
-
-            app.UseAuthentication();
-            app.UseAuthorization();
             
             app.UseSwaggerConfiguration("SSNBackend v1");
 

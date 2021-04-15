@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Core.Interfaces.Services;
 using Core.ObisApiModels;
 
@@ -24,7 +25,8 @@ namespace ObisRestClient
         public async Task<Authenticate.Response> AuthenticateAsync(Authenticate.Request request)
         {
             var response = await _httpService.PostAsync<Authenticate.Response>(AUTHENTICATE, request);
-            _httpService.SetAuthKey(response.AuthKey);
+            if (response != null && !string.IsNullOrEmpty(response.AuthKey))
+                _httpService.SetAuthKey(response.AuthKey);
             return response;
         }
 
@@ -38,9 +40,9 @@ namespace ObisRestClient
             return _httpService.GetAsync<StudentInfo.Response>(STUDENT_INFO);
         }
 
-        public Task<StudentTakenLessons.Response> StudentTakenLessonsAsync()
+        public Task<List<StudentTakenLessons.Response>> StudentTakenLessonsAsync()
         {
-            return _httpService.GetAsync<StudentTakenLessons.Response>(STUDENT_TAKEN_LESSONS);
+            return _httpService.GetAsync<List<StudentTakenLessons.Response>>(STUDENT_TAKEN_LESSONS);
         }
 
         public Task<StudentTranscript.Response> StudentTranscriptAsync()

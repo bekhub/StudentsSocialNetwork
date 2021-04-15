@@ -30,7 +30,7 @@ namespace Api.Endpoints.Auth
             Summary = "Revokes refresh token",
             Description = "Provide refresh token",
             OperationId = "auth.revokeToken",
-            Tags = new[] { "AuthEndpoints" })]
+            Tags = new[] { "Auth.SignIn" })]
         public override async Task<ActionResult> HandleAsync(string token, CancellationToken cancellationToken = new())
         {
             if (string.IsNullOrEmpty(token)) return BadRequest("Token is required");

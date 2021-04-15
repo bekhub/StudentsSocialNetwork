@@ -6,7 +6,7 @@ namespace Core.Interfaces.Repositories
 {
     public interface IUserRepository : IRepository<ApplicationUser>
     {
-        Task<(ApplicationUser, RefreshToken)> GetByRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
+        Task<(ApplicationUser, RefreshToken)> GetByActiveRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
 
         Task<ApplicationUser> GetByUsernameAsync(string username);
 

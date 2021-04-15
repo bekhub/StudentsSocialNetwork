@@ -50,6 +50,7 @@ namespace Api
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseSentry("https://abb483c51f784d56b34cbf8f6389e24b@o569806.ingest.sentry.io/5715991");
                 });
     }
 }

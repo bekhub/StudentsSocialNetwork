@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+    <PackageReference Include="Sentry.AspNetCore" Version="3.3.1" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.1.1" />
@@ -37,5 +38,9 @@
   <ItemGroup>
     <Folder Include="wwwroot\images" />
   </ItemGroup>
+
+  <Target Name="CreateStaticFilesFolder" AfterTargets="AfterPublish">
+    <MakeDir Directories="$(PublishDir)wwwroot/images" Condition="!Exists('$(PublishDir)wwwroot/images')" />
+  </Target>
 
 </Project>

@@ -1,0 +1,109 @@
+﻿using System;
+using System.Threading.Tasks;
+using Api.Services;
+using Core.Entities;
+using Core.Interfaces;
+using Core.Interfaces.Services;
+using Core.ObisApiModels;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace Api.Endpoints.Registration
+{
+    public class RegistrationService
+    {
+        private readonly SsnDbContext _context;
+        private readonly IFireAndForgetHandler _fireAndForgetHandler;
+        private readonly IRestApiService _restApiService;
+        private readonly IEncryptionService _encryptionService;
+
+        public RegistrationService(SsnDbContext context, IRestApiService restApiService,
+            IEncryptionService encryptionService, IFireAndForgetHandler fireAndForgetHandler)
+        {
+            _context = context;
+            _restApiService = restApiService;
+            _encryptionService = encryptionService;
+            _fireAndForgetHandler = fireAndForgetHandler;
+        }
+
+        public async Task<bool> CheckStudentAsync(string studentNumber, string studentPassword)
+        {
+            var response = await _restApiService.AuthenticateAsync(new Authenticate.Request
+            {
+                Number = studentNumber,
+                Password = studentPassword,
+            });
+            return response != null && !string.IsNullOrEmpty(response.AuthKey);
+        }
+
+        public async Task<Student> GetStudentAsync(string studentNumber)
+        {
+            return await _context.Students.SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
+        }
+
+        public async Task<Student> GetUnregisteredStudentAsync(string studentNumber, string studentPassword)
+        {
+            var student = await GetStudentAsync(studentNumber);
+            if (student?.UserId != null) return null;
+            return student ?? await BuildStudentAsync(studentNumber, studentPassword);
+        }
+
+        public void SynchronizeStudentCourses(string studentNumber)
+        {
+            _fireAndForgetHandler.Execute<StudentsService>(async studentsService =>
+            {
+                await studentsService.LoggedSynchronizeStudentCourses(studentNumber);
+            });
+        }
+
+        private async Task<Student> BuildStudentAsync(string studentNumber, string studentPassword)
+        {
+            var authenticate = await _restApiService.AuthenticateAsync(studentNumber, studentPassword);
+            if (authenticate == null || string.IsNullOrEmpty(authenticate.AuthKey))
+                return null;
+
+            var mainInfo = await _restApiService.MainInfoAsync();
+            var studentInfo = await _restApiService.StudentInfoAsync();
+
+            var encryptedPassword = await _encryptionService.EncryptAsync(studentPassword);
+            var admissionYear = Convert.ToInt32($"20{studentNumber[..2]}");
+            var department = await GetDepartmentAsync(mainInfo.Department, mainInfo.Faculty);
+            var studentEmail = GetStudentEmail(studentNumber);
+            return new Student
+            {
+                StudentNumber = studentNumber,
+                StudentPassword = encryptedPassword,
+                StudentEmail = studentEmail,
+                Firstname = studentInfo.Name,
+                Lastname = studentInfo.Surname,
+                AuthKey = authenticate.AuthKey,
+                AdmissionYear = admissionYear,
+                BirthPlace = studentInfo.Birthplace,
+                BirthDate = DateTime.Parse(studentInfo.Birthday),
+                Department = department,
+            };
+        }
+
+        private async Task<Institute> GetInstituteAsync(string name)
+        {
+            return await _context.Institutes.SingleOrDefaultAsync(x => x.Name == name) ?? new Institute
+            {
+                Name = name,
+            };
+        }
+
+        private async Task<Department> GetDepartmentAsync(string departmentName, string instituteName)
+        {
+            return await _context.Departments.SingleOrDefaultAsync(x => x.Name == departmentName) ?? new Department
+            {
+                Name = departmentName,
+                Institute = await GetInstituteAsync(instituteName),
+            };
+        }
+
+        private static string GetStudentEmail(string studentNumber)
+        {
+            return $"{studentNumber}@manas.edu.kg";
+        }
+    }
+}

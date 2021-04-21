@@ -12,12 +12,12 @@ namespace Api.Services
             _emailSender = emailSender;
         }
 
-        public Task SendVerificationEmailAsync(string email, string verificationToken, string origin)
+        public Task SendVerificationEmailAsync(string email, string verificationToken, string host)
         {
             string message;
-            if (!string.IsNullOrEmpty(origin))
+            if (!string.IsNullOrEmpty(host))
             {
-                var verifyUrl = $"{origin}/api/verify-email?token={verificationToken}";
+                var verifyUrl = $"{host}/api/verify-email?token={verificationToken}";
                 message = $@"<p>Please <a href='{verifyUrl}'>click here</a> to verify your email address.</p>";
             }
             else
@@ -35,12 +35,12 @@ namespace Api.Services
                          {message}");
         }
 
-        public Task SendAlreadyRegisteredEmailAsync(string email, string origin)
+        public Task SendAlreadyRegisteredEmailAsync(string email, string host)
         {
             string message;
-            if (!string.IsNullOrEmpty(origin))
+            if (!string.IsNullOrEmpty(host))
                 message = $@"<p>If you don't know your password please visit the 
-                             <a href='{origin}/api/forgot-password'>forgot password</a> page.</p>";
+                             <a href='{host}/api/forgot-password'>forgot password</a> page.</p>";
             else
                 message = "<p>If you don't know your password you can reset it via the " +
                           "<code>/api/forgot-password</code> api route.</p>";
@@ -53,12 +53,12 @@ namespace Api.Services
                          {message}");
         }
 
-        public Task SendPasswordResetEmailAsync(string email, string resetToken, string origin)
+        public Task SendPasswordResetEmailAsync(string email, string resetToken, string host)
         {
             string message;
-            if (!string.IsNullOrEmpty(origin))
+            if (!string.IsNullOrEmpty(host))
             {
-                var resetUrl = $"{origin}/api/reset-password?token={resetToken}";
+                var resetUrl = $"{host}/api/reset-password?token={resetToken}";
                 message = $@"<p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
                              <p><a href='{resetUrl}'>{resetUrl}</a></p>";
             }

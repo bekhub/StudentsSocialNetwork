@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Core.ObisApiModels;
 
 namespace Core.Interfaces.Services
@@ -7,11 +8,13 @@ namespace Core.Interfaces.Services
     {
         Task<Authenticate.Response> AuthenticateAsync(Authenticate.Request request);
         
+        Task<Authenticate.Response> AuthenticateAsync(string studentNumber, string studentPassword);
+        
         Task<MainInfo.Response> MainInfoAsync();
         
         Task<StudentInfo.Response> StudentInfoAsync();
         
-        Task<StudentTakenLessons.Response> StudentTakenLessonsAsync();
+        Task<List<StudentTakenLessons.Response>> StudentTakenLessonsAsync();
         
         Task<StudentTranscript.Response> StudentTranscriptAsync();
         

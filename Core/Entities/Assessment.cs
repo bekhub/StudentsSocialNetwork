@@ -4,7 +4,7 @@ namespace Core.Entities
 {
     public class Assessment : BaseEntity, IAggregateRoot
     {
-        public int Point { get; set; }
+        public int? Point { get; set; }
 
         public string Type { get; set; }
 

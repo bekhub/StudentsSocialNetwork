@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Core.Interfaces;
 
 namespace Core.Entities
@@ -7,7 +8,19 @@ namespace Core.Entities
     {
         public int TheoryAbsent { get; set; }
 
+        public double TheoryAbsentPercentage => CalculateAbsentPercentage(TheoryAbsent, Course.Theory);
+
         public int PracticeAbsent { get; set; }
+        
+        public double PracticeAbsentPercentage => CalculateAbsentPercentage(PracticeAbsent, Course.Practice);
+
+        public bool IsActive => AcademicYear == CurrentAcademicYear && Semester == CurrentSemester;
+
+        public int AcademicYear { get; set; }
+
+        public Semester Semester { get; set; }
+
+        public string AverageAssessment { get; set; }
 
         public int StudentId { get; set; }
         public Student Student { get; set; }
@@ -16,5 +29,21 @@ namespace Core.Entities
         public Course Course { get; set; }
 
         public ICollection<Assessment> Assessments { get; set; }
+        
+        public static Semester CurrentSemester => DateTime.UtcNow.Month is > 8 or < 2 ? Semester.First : Semester.Second;
+
+        public static int CurrentAcademicYear => DateTime.UtcNow.Year;
+
+        private static float CalculateAbsentPercentage(int absent, int coursesPerWeek)
+        {
+            if (coursesPerWeek == 0) return 0;
+            return (float) absent * 100 / (16 * coursesPerWeek);
+        }
+    }
+
+    public enum Semester
+    {
+        First = 1,
+        Second = 2,
     }
 }

@@ -1,23 +1,21 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Ardalis.ApiEndpoints;
-using Core.Interfaces.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using AuthenticateRequest = Core.ObisApiModels.Authenticate.Request;
 
-namespace Api.Endpoints.Auth
+namespace Api.Endpoints.Registration
 {
     public class CheckStudent : BaseAsyncEndpoint
         .WithRequest<Request.CheckStudent>
         .WithResponse<Response.CheckStudent>
     {
-        private readonly IRestApiService _restApiService;
+        private readonly RegistrationService _registrationService;
 
-        public CheckStudent(IRestApiService restApiService)
+        public CheckStudent(RegistrationService registrationService)
         {
-            _restApiService = restApiService;
+            _registrationService = registrationService;
         }
 
         [HttpPost("api/check-student")]
@@ -25,25 +23,15 @@ namespace Api.Endpoints.Auth
             Summary = "Checks whether the student exists",
             Description = "Checks whether the student exists",
             OperationId = "auth.checkStudent",
-            Tags = new[] { "AuthEndpoints" })]
+            Tags = new[] { "Auth.SignUp" })]
         public override async Task<ActionResult<Response.CheckStudent>> HandleAsync(Request.CheckStudent request, 
             CancellationToken cancellationToken = new())
         {
-            var response = await _restApiService.AuthenticateAsync(new AuthenticateRequest
-            {
-                Number = request.StudentNumber,
-                Password = request.StudentPassword,
-            });
-            var isExist = response != null && !string.IsNullOrEmpty(response.AuthKey);
-            var message = isExist
-                ? "The student exists"
-                : "The student does not exist";
-            
-            return new Response.CheckStudent
-            {
-                IsExist = isExist,
-                Message = message,
-            };
+            var isExist = await _registrationService.CheckStudentAsync(request.StudentNumber, request.StudentPassword);
+
+            return isExist
+                ? Ok(new Response.CheckStudent {IsExist = true, Message = "The student exists"})
+                : BadRequest(new Response.CheckStudent {IsExist = false, Message = "The student does not exist"});
         }
         
         public class RequestValidator : AbstractValidator<Request.CheckStudent>

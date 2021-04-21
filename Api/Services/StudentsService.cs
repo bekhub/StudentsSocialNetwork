@@ -1,10 +1,14 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using Common.Extensions;
 using Core.Entities;
 using Core.Interfaces.Services;
 using Core.ObisApiModels;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Api.Services
 {
@@ -12,80 +16,158 @@ namespace Api.Services
     {
         private readonly SsnDbContext _context;
         private readonly IRestApiService _restApiService;
+        private readonly ILogger<StudentsService> _logger;
         private readonly IEncryptionService _encryptionService;
 
-        public StudentsService(SsnDbContext ssnDbContext, IRestApiService restApiService, 
-            IEncryptionService encryptionService)
+        public StudentsService(SsnDbContext ssnDbContext, IRestApiService restApiService,
+            IEncryptionService encryptionService, ILogger<StudentsService> logger)
         {
             _context = ssnDbContext;
             _restApiService = restApiService;
             _encryptionService = encryptionService;
+            _logger = logger;
         }
 
-        public async Task<Student> GetStudentAsync(string studentNumber)
+        public async Task LoggedSynchronizeStudentCourses(string studentNumber)
         {
-            return await _context.Students.SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
-        }
-        
-        public async Task<Student> GetUnregisteredStudentAsync(string studentNumber, string studentPassword)
-        {
-            var student = await _context.Students.SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
-            if (student?.UserId != null) return null;
-            return student ?? await BuildStudentAsync(studentNumber, studentPassword);
+            var student = await _context.Students
+                .Include(x => x.StudentCourses)
+                .SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
+            if (student == null) return;
+            var stopwatch = new Stopwatch();
+            _logger.LogWarning("Start synchronizing ({Firstname} {Lastname}) student's courses",
+                student.Firstname, student.Lastname);
+            stopwatch.Start();
+
+            await SynchronizeStudentCourses(student);
+
+            stopwatch.Stop();
+            _logger.LogWarning("End synchronizing ({Firstname} {Lastname}) student's courses. {Milliseconds} ms elapsed", 
+                student.Firstname, student.Lastname, stopwatch.Elapsed.Milliseconds);
         }
 
-        public async Task<Student> BuildStudentAsync(string studentNumber, string studentPassword)
+        private async Task SynchronizeStudentCourses(Student student)
         {
-            var authenticate = await _restApiService.AuthenticateAsync(new Authenticate.Request
+            var studentNumber = student.StudentNumber;
+            var studentPassword = await _encryptionService.DecryptAsync(student.StudentPassword);
+
+            var response = await _restApiService.AuthenticateAsync(studentNumber, studentPassword);
+            student.AuthKey = response.AuthKey;
+            var takenLessons = await _restApiService.StudentTakenLessonsAsync();
+            var studentCourses = await GetStudentCoursesAsync(takenLessons, student.Id);
+            student.StudentCourses = studentCourses;
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<List<StudentCourse>> GetStudentCoursesAsync(IEnumerable<StudentTakenLessons.Response> models,
+            int studentId)
+        {
+            var semesterNotes = await _restApiService.StudentSemesterNotesAsync();
+            var studentCourses = new List<StudentCourse>();
+            foreach (var model in models)
             {
-                Number = studentNumber,
-                Password = studentPassword,
-            });
-            if (authenticate == null || string.IsNullOrEmpty(authenticate.AuthKey))
-                return null;
+                var lesson = semesterNotes.GetLessonByCodeAndName(model.Code, model.Name);
+                var assessments = await GetAssessmentsAsync(lesson, studentId);
+                var studentCourse = await GetStudentCourseAsync(model, assessments, studentId);
+                studentCourse.AverageAssessment = lesson?.Exams.FirstOrDefault(x => string.IsNullOrEmpty(x.Avg))?.Avg;
+                studentCourses.Add(studentCourse);
+            }
 
-            var mainInfo = await _restApiService.MainInfoAsync();
-            var studentInfo = await _restApiService.StudentInfoAsync();
-
-            var encryptedPassword = await _encryptionService.EncryptAsync(studentPassword);
-            var admissionYear = Convert.ToInt32($"20{studentNumber[..2]}");
-            var department = await GetDepartmentAsync(mainInfo.Department, mainInfo.Faculty);
-            var studentEmail = GetStudentEmail(studentNumber);
-            return new Student
-            {
-                StudentNumber = studentNumber,
-                StudentPassword = encryptedPassword,
-                StudentEmail = studentEmail,
-                Firstname = studentInfo.Name,
-                Lastname = studentInfo.Surname,
-                AuthKey = authenticate.AuthKey,
-                AdmissionYear = admissionYear,
-                BirthPlace = studentInfo.Birthplace,
-                BirthDate = DateTime.Parse(studentInfo.Birthday),
-                Department = department,
-            };
+            return studentCourses;
         }
 
-        private async Task<Institute> GetInstituteAsync(string name)
+        private async Task<StudentCourse> GetStudentCourseAsync(StudentTakenLessons.Response model,
+            ICollection<Assessment> assessments, int studentId)
         {
-            return await _context.Institutes.SingleOrDefaultAsync(x => x.Name == name) ?? new Institute
-            {
-                Name = name,
-            };
+            var course = await GetCourseAsync(model);
+            var studentCourse = await _context.StudentCourses
+                .FirstOrDefaultAsync(x =>
+                    x.CourseId == course.Id &&
+                    x.StudentId == studentId);
+            
+            return studentCourse is {IsActive: true}
+                ? studentCourse
+                : new StudentCourse
+                {
+                    TheoryAbsent = model.TheoryAbsent.AsInt(),
+                    PracticeAbsent = model.PracticeAbsent.AsInt(),
+                    AcademicYear = StudentCourse.CurrentAcademicYear,
+                    Semester = StudentCourse.CurrentSemester,
+                    Course = course,
+                    Assessments = assessments,
+                };
         }
 
-        private async Task<Department> GetDepartmentAsync(string departmentName, string instituteName)
+        private async Task<List<Assessment>> GetAssessmentsAsync(StudentSemesterNotes.Lesson model, int studentId)
         {
-            return await _context.Departments.SingleOrDefaultAsync(x => x.Name == departmentName) ?? new Department
+            if (model is null) return null;
+
+            var studentCourse = await _context.StudentCourses
+                .Include(x => x.Course)
+                .Include(x => x.Assessments)
+                .FirstOrDefaultAsync(x =>
+                    x.StudentId == studentId &&
+                    x.Course.Code == model.LessonCodeFromName &&
+                    x.Course.Name == model.LessonNameFromName);
+            List<Assessment> assessmentsToCreate;
+            if (studentCourse == null || studentCourse.Assessments.Count == 0 || !studentCourse.IsActive)
             {
-                Name = departmentName,
-                Institute = await GetInstituteAsync(instituteName),
-            };
+                assessmentsToCreate = model.Exams.Select(x => new Assessment
+                {
+                    Type = x.Name,
+                    Point = !string.IsNullOrEmpty(x.Mark) ? x.Mark.AsInt() : 0,
+                }).ToList();
+            }
+            else
+            {
+                var examNames = model.Exams.ToDictionary(x => x.Name);
+                var assessmentsToDelete = studentCourse.Assessments
+                    .Where(x => !examNames.ContainsKey(x.Type)).ToArray();
+                var assessmentsToUpdate = studentCourse.Assessments
+                    .Where(x => examNames.ContainsKey(x.Type))
+                    .Select(x =>
+                    {
+                        x.Point = examNames[x.Type].Mark.AsInt();
+                        return x;
+                    })
+                    .ToDictionary(x => x.Type);
+
+                if (assessmentsToDelete.Any())
+                {
+                    _context.Assessments.RemoveRange(assessmentsToDelete);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (assessmentsToUpdate.Any())
+                {
+                    _context.Assessments.UpdateRange(assessmentsToUpdate.Values);
+                    await _context.SaveChangesAsync();
+                }
+
+                assessmentsToCreate = examNames.Values
+                    .Where(x => !assessmentsToUpdate.ContainsKey(x.Name))
+                    .Select(x => new Assessment
+                    {
+                        Type = x.Name,
+                        Point = !string.IsNullOrEmpty(x.Mark) ? x.Mark.AsInt() : 0,
+                    }).ToList();
+            }
+
+            return assessmentsToCreate;
         }
 
-        private string GetStudentEmail(string studentNumber)
+        private async Task<Course> GetCourseAsync(StudentTakenLessons.Response model)
         {
-            return $"{studentNumber}@manas.edu.kg";
+            return await _context.Courses
+                       .FirstOrDefaultAsync(x => x.Code == model.Code && x.Name == model.Name) ??
+                   new Course
+                   {
+                       Code = model.Code,
+                       Name = model.Name,
+                       Credits = model.Credit.AsInt(),
+                       Practice = model.Practice.AsInt(),
+                       Theory = model.Theory.AsInt(),
+                   };
         }
     }
 }

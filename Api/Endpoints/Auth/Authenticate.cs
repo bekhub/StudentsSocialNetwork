@@ -38,10 +38,10 @@ namespace Api.Endpoints.Auth
 
         [HttpPost("api/authenticate")]
         [SwaggerOperation(
-            Summary = "Authenticates a user",
-            Description = "Authenticates a user",
+            Summary = "Authenticates the user",
+            Description = "Authenticates the user",
             OperationId = "auth.authenticate",
-            Tags = new[] { "AuthEndpoints" })]
+            Tags = new[] { "Auth.SignIn" })]
         public override async Task<ActionResult<Response.Authenticate>> HandleAsync(Request.Authenticate request, 
             CancellationToken cancellationToken = default)
         {
@@ -74,6 +74,7 @@ namespace Api.Endpoints.Auth
             return new Response.Authenticate
             {
                 Username = user.UserName,
+                UserId = user.Id,
                 JwtToken = jwtToken,
                 RefreshToken = refreshToken.Token,
             };

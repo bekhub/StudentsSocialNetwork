@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Core.Interfaces;
 
 namespace Core.Entities
@@ -28,5 +29,8 @@ namespace Core.Entities
 
         public int DepartmentId { get; set; }
         public Department Department { get; set; }
+        
+        public ICollection<Course> Courses { get; set; }
+        public List<StudentCourse> StudentCourses { get; set; }
     }
 }

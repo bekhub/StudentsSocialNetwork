@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +24,8 @@ namespace Infrastructure.Services
         public string GetCurrentUserId()
         {
             return _httpContextAccessor.HttpContext?.User.Claims
-                .FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+                .FirstOrDefault(x => x.Type is JwtRegisteredClaimNames.Sub 
+                    or ClaimTypes.NameIdentifier)?.Value;
         }
 
         public ApplicationUser GetCurrentUser()

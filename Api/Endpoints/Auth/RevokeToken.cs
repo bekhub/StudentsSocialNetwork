@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Api.Configuration;
 using Ardalis.ApiEndpoints;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Infrastructure.Identity;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -24,11 +24,11 @@ namespace Api.Endpoints.Auth
             _userRepository = userRepository;
         }
 
-        [Authorize]
+        [JwtAuthorize]
         [HttpPost("api/revoke-token")]
         [SwaggerOperation(
             Summary = "Revokes refresh token",
-            Description = "Provide refresh token",
+            Description = "Provide refresh token. Requires authorization",
             OperationId = "auth.revokeToken",
             Tags = new[] { "Auth.SignIn" })]
         public override async Task<ActionResult> HandleAsync(string token, CancellationToken cancellationToken = new())

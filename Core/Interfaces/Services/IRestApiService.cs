@@ -8,6 +8,8 @@ namespace Core.Interfaces.Services
     {
         Task<Authenticate.Response> AuthenticateAsync(Authenticate.Request request);
         
+        Task<Authenticate.Response> AuthenticateAsync(string studentNumber, string studentPassword);
+        
         Task<MainInfo.Response> MainInfoAsync();
         
         Task<StudentInfo.Response> StudentInfoAsync();

@@ -1,22 +1,21 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Api.Services;
 using Ardalis.ApiEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Api.Endpoints.Auth
+namespace Api.Endpoints.Registration
 {
     public class CheckStudent : BaseAsyncEndpoint
         .WithRequest<Request.CheckStudent>
         .WithResponse<Response.CheckStudent>
     {
-        private readonly StudentsService _studentsService;
+        private readonly RegistrationService _registrationService;
 
-        public CheckStudent(StudentsService studentsService)
+        public CheckStudent(RegistrationService registrationService)
         {
-            _studentsService = studentsService;
+            _registrationService = registrationService;
         }
 
         [HttpPost("api/check-student")]
@@ -28,7 +27,7 @@ namespace Api.Endpoints.Auth
         public override async Task<ActionResult<Response.CheckStudent>> HandleAsync(Request.CheckStudent request, 
             CancellationToken cancellationToken = new())
         {
-            var isExist = await _studentsService.CheckStudentAsync(request.StudentNumber, request.StudentPassword);
+            var isExist = await _registrationService.CheckStudentAsync(request.StudentNumber, request.StudentPassword);
 
             return isExist
                 ? Ok(new Response.CheckStudent {IsExist = true, Message = "The student exists"})

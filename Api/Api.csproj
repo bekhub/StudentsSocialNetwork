@@ -36,7 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Helpers\Exceptions" />
     <Folder Include="wwwroot\images" />
   </ItemGroup>
 

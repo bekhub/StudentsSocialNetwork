@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
+using Core.Exceptions;
 using Core.Interfaces.Services;
 
 namespace Infrastructure.Services
@@ -13,6 +13,8 @@ namespace Infrastructure.Services
 
         public EncryptionService(string encryptionKey)
         {
+            if (string.IsNullOrEmpty(encryptionKey))
+                throw new AppException("EncryptionKey is null or empty");
             _encryptionKey = encryptionKey;
         }
 
@@ -56,7 +58,7 @@ namespace Infrastructure.Services
 
             Buffer.BlockCopy(fullCipher, 0, iv, 0, iv.Length);
             Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, iv.Length);
-            var key = Encoding.UTF8.GetBytes(_encryptionKey);
+            var key = Convert.FromBase64String(_encryptionKey);
 
             using var aesAlg = Aes.Create();
             using var decryptor = aesAlg.CreateDecryptor(key, iv);

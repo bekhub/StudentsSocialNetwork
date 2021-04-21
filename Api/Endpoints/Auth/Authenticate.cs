@@ -74,6 +74,7 @@ namespace Api.Endpoints.Auth
             return new Response.Authenticate
             {
                 Username = user.UserName,
+                UserId = user.Id,
                 JwtToken = jwtToken,
                 RefreshToken = refreshToken.Token,
             };

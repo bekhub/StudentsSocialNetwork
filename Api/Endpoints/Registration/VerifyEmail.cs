@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Api.Endpoints.Auth
+namespace Api.Endpoints.Registration
 {
     public class VerifyEmail : BaseAsyncEndpoint
         .WithRequest<Request.VerifyEmail>
@@ -24,7 +24,7 @@ namespace Api.Endpoints.Auth
         [HttpPost("api/verify-email")]
         [SwaggerOperation(
             Summary = "Verifies email",
-            Description = "Verifies email",
+            Description = "Verifies email after registration",
             OperationId = "auth.verifyEmail",
             Tags = new[] { "Auth.SignUp" })]
         public override async Task<ActionResult<Response.VerifyEmail>> HandleAsync([FromQuery] Request.VerifyEmail request,

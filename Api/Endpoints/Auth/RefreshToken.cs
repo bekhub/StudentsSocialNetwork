@@ -40,8 +40,8 @@ namespace Api.Endpoints.Auth
             CancellationToken cancellationToken = new())
         {
             if (string.IsNullOrEmpty(token)) return BadRequest("Token is required");
-            var (user, refreshToken) = await _userRepository.GetByActiveRefreshTokenAsync(token, cancellationToken);
-            if (user == null) return Unauthorized("Invalid token");
+            var (user, refreshToken) = await _userRepository.GetByRefreshTokenAsync(token, cancellationToken);
+            if (user == null || !refreshToken.IsActive) return Unauthorized("Invalid token");
 
             var ipAddress = _userAccessor.GetIpAddress();
             var newRefreshToken = _jwtFactory.CreateRefreshToken(ipAddress);
@@ -57,6 +57,7 @@ namespace Api.Endpoints.Auth
             return new Response.Authenticate
             {
                 Username = user.UserName,
+                UserId = user.Id,
                 JwtToken = jwtToken,
                 RefreshToken = newRefreshToken.Token,
             };

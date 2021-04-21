@@ -30,6 +30,15 @@ namespace ObisRestClient
             return response;
         }
 
+        public Task<Authenticate.Response> AuthenticateAsync(string studentNumber, string studentPassword)
+        {
+            return AuthenticateAsync(new Authenticate.Request
+            {
+                Number = studentNumber,
+                Password = studentPassword,
+            });
+        }
+
         public Task<MainInfo.Response> MainInfoAsync()
         {
             return _httpService.GetAsync<MainInfo.Response>(MAIN_INFO);

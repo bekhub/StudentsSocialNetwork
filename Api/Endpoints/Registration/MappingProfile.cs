@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Core.Entities;
 
-namespace Api.Endpoints.Auth
+namespace Api.Endpoints.Registration
 {
     public class MappingProfile : Profile
     {

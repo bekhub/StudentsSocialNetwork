@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Api.Endpoints.Auth
+namespace Api.Endpoints.Registration
 {
     public class ResendConfirmationEmail : BaseAsyncEndpoint
         .WithRequest<string>
@@ -25,22 +25,22 @@ namespace Api.Endpoints.Auth
 
         [HttpPost("api/resend-confirmation-email")]
         [SwaggerOperation(
-            Summary = "Resend confirmation email",
-            Description = "Resend confirmation email",
+            Summary = "Resends confirmation email",
+            Description = "Resends confirmation email if user didn't receive email",
             OperationId = "auth.resendConfirmationEmail",
             Tags = new[] { "Auth.SignUp" })]
         public override async Task<ActionResult> HandleAsync(string email, 
             CancellationToken cancellationToken = new())
         {
             if (string.IsNullOrEmpty(email)) return BadRequest(Result.EmailRequired);
-            var origin = Request.Host.Value;
+            var host = Request.Host.Value;
 
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null) return BadRequest(Result.UserNotFound);
             
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            await _emailService.SendVerificationEmailAsync(user.Email, verificationToken, origin);
+            await _emailService.SendVerificationEmailAsync(user.Email, verificationToken, host);
 
             return Ok(Result.EmailSent);
         }

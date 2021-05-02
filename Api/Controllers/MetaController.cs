@@ -32,13 +32,15 @@ namespace Api.Controllers
             return Ok(new
             {
                 IpAddress = _userAccessor.GetIpAddress(),
-                Request.Headers,
-                Request.Cookies,
             });
         }
 
         [JwtAuthorize]
         [HttpGet("/protected-route")]
-        public ActionResult<object> ProtectedRoute() => Ok(new { message = "Success" });
+        public ActionResult<object> ProtectedRoute()
+        {
+            var user = _userAccessor.GetCurrentUser();
+            return Ok(new {username = user.UserName});
+        }
     }
 }

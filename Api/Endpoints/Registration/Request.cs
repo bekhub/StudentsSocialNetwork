@@ -5,12 +5,7 @@ namespace Api.Endpoints.Registration
 {
     public class Request
     {
-        public class CheckStudent
-        {
-            public string StudentNumber { get; set; }
-
-            public string StudentPassword { get; set; }
-        }
+        public record CheckStudent(string StudentNumber, string StudentPassword);
         
         public class Register
         {
@@ -32,12 +27,7 @@ namespace Api.Endpoints.Registration
             
             public IFormFile ProfilePicture { get; set; }
         }
-        
-        public class VerifyEmail
-        {
-            public string Email { get; set; }
-            
-            public string Token { get; set; }
-        }
+
+        public record VerifyEmail(string Email, string Token);
     }
 }

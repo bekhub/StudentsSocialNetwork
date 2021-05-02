@@ -16,21 +16,23 @@ namespace Infrastructure.Data
         { }
 
         public DbSet<Student> Students { get; set; }
-        
         public DbSet<Department> Departments { get; set; }
-
         public DbSet<Course> Courses { get; set; }
-        
         public DbSet<CourseTime> CourseTimes { get; set; }
-
         public DbSet<StudentCourse> StudentCourses { get; set; }
-        
         public DbSet<Assessment> Assessments { get; set; }
-        
         public DbSet<Institute> Institutes { get; set; }
-
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<PostPicture> PostPictures { get; set; }
+        public DbSet<PostLike> PostLikes { get; set; }
+        public DbSet<PostTag> PostTags { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<PostComment> PostComments { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<CommentLike> CommentLikes { get; set; }
+        public DbSet<CommentReply> CommentReplies { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

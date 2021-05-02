@@ -30,11 +30,12 @@ namespace Api.Endpoints.Registration
         public override async Task<ActionResult<Response.VerifyEmail>> HandleAsync([FromQuery] Request.VerifyEmail request,
             CancellationToken cancellationToken = new())
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var (email, token) = request;
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return BadRequest(new Response.VerifyEmail(false));
 
-            var result = await _userManager.ConfirmEmailAsync(user, request.Token);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
 
             if (!result.Succeeded)
                 return BadRequest(new Response.VerifyEmail(false));

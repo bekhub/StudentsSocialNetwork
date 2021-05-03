@@ -2,12 +2,7 @@
 {
     public class Response
     {
-        public class CheckStudent
-        {
-            public bool IsExist { get; set; }
-
-            public string Message { get; set; }
-        }
+        public record CheckStudent(bool IsExist, string Message);
 
         public record VerifyEmail(bool IsVerified);
     }

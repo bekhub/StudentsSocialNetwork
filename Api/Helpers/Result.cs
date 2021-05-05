@@ -8,6 +8,7 @@
         private const string REGISTER_SUCCESS = "User created";
         private const string EMAIL_REQUIRED = "Email required";
         private const string EMAIL_SENT = "Confirmation email sent";
+        private const string POST_CREATED = "New post created";
 
         /// <summary>
         /// User already registered
@@ -33,5 +34,10 @@
         /// Confirmation email sent
         /// </summary>
         public static Result EmailSent => new(EMAIL_SENT);
+
+        /// <summary>
+        /// Post created
+        /// </summary>
+        public static Result PostCreated => new(POST_CREATED);
     }
 }

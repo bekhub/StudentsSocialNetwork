@@ -36,9 +36,9 @@ namespace Api.Endpoints.Registration
             return response != null && !string.IsNullOrEmpty(response.AuthKey);
         }
 
-        public async Task<Student> GetStudentAsync(string studentNumber)
+        public Task<Student> GetStudentAsync(string studentNumber)
         {
-            return await _context.Students.SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
+            return _context.Students.SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
         }
 
         public async Task<Student> GetUnregisteredStudentAsync(string studentNumber, string studentPassword)
@@ -51,9 +51,7 @@ namespace Api.Endpoints.Registration
         public void SynchronizeStudentCourses(string studentNumber)
         {
             _fireAndForgetHandler.Execute<StudentsService>(async studentsService =>
-            {
-                await studentsService.LoggedSynchronizeStudentCourses(studentNumber);
-            });
+                    await studentsService.SynchronizeStudentCoursesAsync(studentNumber));
         }
 
         private async Task<Student> BuildStudentAsync(string studentNumber, string studentPassword)

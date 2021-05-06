@@ -29,6 +29,8 @@ namespace Infrastructure.Data.Configurations
                 .IsRequired();
             builder.Property(x => x.StudentPassword)
                 .IsRequired();
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
 
             builder.HasIndex(x => x.StudentNumber)
                 .IsUnique();

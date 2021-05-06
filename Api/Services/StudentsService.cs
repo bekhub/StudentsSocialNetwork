@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Exceptions;
 using Common.Extensions;
 using Core.Entities;
 using Core.Interfaces.Services;
@@ -28,12 +29,17 @@ namespace Api.Services
             _logger = logger;
         }
 
-        public async Task LoggedSynchronizeStudentCourses(string studentNumber)
+        public async Task SynchronizeStudentCoursesAsync(string studentNumber)
         {
             var student = await _context.Students
                 .Include(x => x.StudentCourses)
                 .SingleOrDefaultAsync(x => x.StudentNumber == studentNumber);
-            if (student == null) return;
+            await SynchronizeStudentCoursesAsync(student);
+        }
+
+        public async Task SynchronizeStudentCoursesAsync(Student student)
+        {
+            if (student == null) throw new NotFoundException("Student not found");
             var stopwatch = new Stopwatch();
             _logger.LogWarning("Start synchronizing ({Firstname} {Lastname}) student's courses",
                 student.Firstname, student.Lastname);
@@ -42,7 +48,8 @@ namespace Api.Services
             await SynchronizeStudentCourses(student);
 
             stopwatch.Stop();
-            _logger.LogWarning("End synchronizing ({Firstname} {Lastname}) student's courses. {Milliseconds} ms elapsed", 
+            _logger.LogWarning(
+                "End synchronizing ({Firstname} {Lastname}) student's courses. {Milliseconds} ms elapsed",
                 student.Firstname, student.Lastname, stopwatch.Elapsed.Milliseconds);
         }
 
@@ -52,6 +59,9 @@ namespace Api.Services
             var studentPassword = await _encryptionService.DecryptAsync(student.StudentPassword);
 
             var response = await _restApiService.AuthenticateAsync(studentNumber, studentPassword);
+            if (response == null || string.IsNullOrEmpty(response.AuthKey))
+                throw new LogicException("Something went wrong :(. Student password can be invalid");
+
             student.AuthKey = response.AuthKey;
             var takenLessons = await _restApiService.StudentTakenLessonsAsync();
             var studentCourses = await GetStudentCoursesAsync(takenLessons, student.Id);
@@ -84,18 +94,24 @@ namespace Api.Services
                 .FirstOrDefaultAsync(x =>
                     x.CourseId == course.Id &&
                     x.StudentId == studentId);
-            
-            return studentCourse is {IsActive: true}
-                ? studentCourse
-                : new StudentCourse
-                {
-                    TheoryAbsent = model.TheoryAbsent.AsInt(),
-                    PracticeAbsent = model.PracticeAbsent.AsInt(),
-                    AcademicYear = StudentCourse.CurrentAcademicYear,
-                    Semester = StudentCourse.CurrentSemester,
-                    Course = course,
-                    Assessments = assessments,
-                };
+
+            if (studentCourse != null)
+            {
+                studentCourse.TheoryAbsent = model.TheoryAbsent.AsIntOrZero();
+                studentCourse.PracticeAbsent = model.PracticeAbsent.AsIntOrZero();
+                studentCourse.Assessments = assessments;
+                return studentCourse;
+            }
+
+            return new StudentCourse
+            {
+                TheoryAbsent = model.TheoryAbsent.AsIntOrZero(),
+                PracticeAbsent = model.PracticeAbsent.AsIntOrZero(),
+                AcademicYear = StudentCourse.CurrentAcademicYear,
+                Semester = StudentCourse.CurrentSemester,
+                Course = course,
+                Assessments = assessments,
+            };
         }
 
         private async Task<List<Assessment>> GetAssessmentsAsync(StudentSemesterNotes.Lesson model, int studentId)
@@ -109,51 +125,34 @@ namespace Api.Services
                     x.StudentId == studentId &&
                     x.Course.Code == model.LessonCodeFromName &&
                     x.Course.Name == model.LessonNameFromName);
-            List<Assessment> assessmentsToCreate;
             if (studentCourse == null || studentCourse.Assessments.Count == 0 || !studentCourse.IsActive)
             {
-                assessmentsToCreate = model.Exams.Select(x => new Assessment
+                return model.Exams.Select(x => new Assessment
                 {
                     Type = x.Name,
-                    Point = !string.IsNullOrEmpty(x.Mark) ? x.Mark.AsInt() : 0,
+                    Point = x.Mark.AsIntOrNull(),
                 }).ToList();
             }
-            else
-            {
-                var examNames = model.Exams.ToDictionary(x => x.Name);
-                var assessmentsToDelete = studentCourse.Assessments
-                    .Where(x => !examNames.ContainsKey(x.Type)).ToArray();
-                var assessmentsToUpdate = studentCourse.Assessments
-                    .Where(x => examNames.ContainsKey(x.Type))
-                    .Select(x =>
-                    {
-                        x.Point = examNames[x.Type].Mark.AsInt();
-                        return x;
-                    })
-                    .ToDictionary(x => x.Type);
 
-                if (assessmentsToDelete.Any())
+            var examNames = model.Exams.ToDictionary(x => x.Name);
+            
+            var assessmentsToUpdate = studentCourse.Assessments
+                .Where(x => examNames.ContainsKey(x.Type))
+                .Select(x =>
                 {
-                    _context.Assessments.RemoveRange(assessmentsToDelete);
-                    await _context.SaveChangesAsync();
-                }
-
-                if (assessmentsToUpdate.Any())
+                    x.Point = examNames[x.Type].Mark.AsIntOrNull();
+                    return x;
+                }).ToDictionary(x => x.Type);
+            
+            var assessmentsToCreate = examNames.Values
+                .Where(x => !assessmentsToUpdate.ContainsKey(x.Name))
+                .Select(x => new Assessment
                 {
-                    _context.Assessments.UpdateRange(assessmentsToUpdate.Values);
-                    await _context.SaveChangesAsync();
-                }
+                    Type = x.Name,
+                    Point = x.Mark.AsIntOrNull(),
+                }).Concat(assessmentsToUpdate.Values);
 
-                assessmentsToCreate = examNames.Values
-                    .Where(x => !assessmentsToUpdate.ContainsKey(x.Name))
-                    .Select(x => new Assessment
-                    {
-                        Type = x.Name,
-                        Point = !string.IsNullOrEmpty(x.Mark) ? x.Mark.AsInt() : 0,
-                    }).ToList();
-            }
-
-            return assessmentsToCreate;
+            return assessmentsToCreate.ToList();
         }
 
         private async Task<Course> GetCourseAsync(StudentTakenLessons.Response model)
@@ -164,9 +163,9 @@ namespace Api.Services
                    {
                        Code = model.Code,
                        Name = model.Name,
-                       Credits = model.Credit.AsInt(),
-                       Practice = model.Practice.AsInt(),
-                       Theory = model.Theory.AsInt(),
+                       Credits = model.Credit.AsIntOrZero(),
+                       Practice = model.Practice.AsIntOrZero(),
+                       Theory = model.Theory.AsIntOrZero(),
                    };
         }
     }

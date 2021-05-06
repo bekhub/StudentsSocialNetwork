@@ -22,6 +22,8 @@ namespace Core.Interfaces.Services
         
         Task<ChangePassword.Response> ChangePasswordAsync(ChangePassword.Request request);
 
+        Task<WakeUp.Response> WakeUpAsync();
+
         void SetAuthKey(string authKey);
     }
 }

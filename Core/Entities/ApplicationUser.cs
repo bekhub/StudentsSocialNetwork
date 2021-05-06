@@ -22,6 +22,14 @@ namespace Core.Entities
 
         public List<RefreshToken> RefreshTokens { get; set; } = new();
 
+        public List<Post> Posts { get; set; } = new();
+
+        public List<Comment> Comments { get; set; } = new();
+
+        public List<PostLike> PostLikes { get; set; } = new();
+
+        public List<CommentLike> CommentLikes { get; set; } = new();
+
         public bool OwnsToken(string token)
         {
             return RefreshTokens.Any(x => x.Token == token);

@@ -27,11 +27,12 @@ namespace Api.Endpoints.Registration
         public override async Task<ActionResult<Response.CheckStudent>> HandleAsync(Request.CheckStudent request, 
             CancellationToken cancellationToken = new())
         {
-            var isExist = await _registrationService.CheckStudentAsync(request.StudentNumber, request.StudentPassword);
+            var (studentNumber, studentPassword) = request;
+            var isExist = await _registrationService.CheckStudentAsync(studentNumber, studentPassword);
 
             return isExist
-                ? Ok(new Response.CheckStudent {IsExist = true, Message = "The student exists"})
-                : BadRequest(new Response.CheckStudent {IsExist = false, Message = "The student does not exist"});
+                ? Ok(new Response.CheckStudent(true, "The student exists"))
+                : BadRequest(new Response.CheckStudent (false, "The student does not exist"));
         }
         
         public class RequestValidator : AbstractValidator<Request.CheckStudent>

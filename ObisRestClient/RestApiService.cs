@@ -16,6 +16,7 @@ namespace ObisRestClient
         private const string STUDENT_TRANSCRIPT = "student-transcript";
         private const string STUDENT_SEMESTER_NOTES = "student-semester-notes";
         private const string CHANGE_PASSWORD = "change-password";
+        private const string WAKE_UP = "wake-up";
 
         public RestApiService(HttpService httpService)
         {
@@ -67,6 +68,11 @@ namespace ObisRestClient
         public Task<ChangePassword.Response> ChangePasswordAsync(ChangePassword.Request request)
         {
             return _httpService.PutAsync<ChangePassword.Response>(CHANGE_PASSWORD, request);
+        }
+
+        public Task<WakeUp.Response> WakeUpAsync()
+        {
+            return _httpService.GetAsync<WakeUp.Response>(WAKE_UP);
         }
 
         public void SetAuthKey(string authKey)

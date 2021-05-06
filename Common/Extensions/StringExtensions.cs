@@ -8,5 +8,15 @@ namespace Common.Extensions
         {
             return Convert.ToInt32(number);
         }
+
+        public static int AsIntOrZero(this string number)
+        {
+            return string.IsNullOrEmpty(number) ? 0 : number.AsInt();
+        }
+
+        public static int? AsIntOrNull(this string number)
+        {
+            return string.IsNullOrEmpty(number) ? null : number.AsInt();
+        }
     }
 }

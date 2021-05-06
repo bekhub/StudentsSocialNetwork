@@ -23,6 +23,8 @@ namespace Core.Entities
         public string BirthPlace { get; set; }
         
         public DateTime? BirthDate { get; set; }
+
+        public bool? IsActive { get; set; }
         
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }

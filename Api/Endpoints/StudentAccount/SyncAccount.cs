@@ -24,7 +24,7 @@ namespace Api.Endpoints.StudentAccount
 
 
         [JwtAuthorize(RoleConstants.STUDENT)]
-        [HttpGet("api/sync-account")]
+        [HttpPost("api/sync-account")]
         [SwaggerOperation(
             Summary = "Synchronize student's account",
             Description = "Synchronize student's account",

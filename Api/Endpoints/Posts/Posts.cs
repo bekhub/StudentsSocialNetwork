@@ -2,14 +2,10 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Api.Endpoints.Registration;
 using Api.Helpers;
-using Api.Helpers.Extensions;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
 using Core.Entities;
-using Core.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
@@ -21,29 +17,24 @@ namespace Api.Endpoints.Posts
         .WithoutResponse
     {
         private readonly PostService _postService;
-        private readonly IFileSystem _fileSystem;
         private readonly ILogger<Posts> _logger;
         private readonly IMapper _mapper;
 
-        private const string FOLDER = "post_pictures";
-
-        public Posts(IFileSystem fileSystem, ILogger<Posts> logger, 
-            PostService postService, IMapper mapper)
+        public Posts(ILogger<Posts> logger, PostService postService, IMapper mapper)
         {
-            _fileSystem = fileSystem;
             _logger = logger;
             _mapper = mapper;
             _postService = postService;
         }
         
-        [HttpPost("api/createPost")]
+        [HttpPost("api/create/post")]
         [SwaggerOperation(
             Summary = "Create a post",
             Description = "Create a post",
             OperationId = "post.create",
             Tags = new []{"Post.Create"})]
         
-        public override async Task<ActionResult> HandleAsync(Request.CreatePost request, CancellationToken cancellationToken = new CancellationToken())
+        public override async Task<ActionResult> HandleAsync(Request.CreatePost request, CancellationToken cancellationToken = new ())
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -51,29 +42,27 @@ namespace Api.Endpoints.Posts
 
             var post = _mapper.Map<Post>(request);
             post.CreatedAt = DateTime.UtcNow;
-            // post.Pictures = await MakePictureUrlAsync(request.PostPic);
 
+            var createdPost = await _postService.CreatePostAsync(request.Body, request.User);
+            if (createdPost == null)
+                return BadRequest(Result.PostNotCreated);
+
+            post.Body = createdPost.Body;
+            post.User = createdPost.User;
             
-            throw new System.NotImplementedException();
+            _logger.LogWarning($"User {User} created post", request.User);
+            
+            stopWatch.Stop();
+            _logger.LogWarning("Creating post ended. {Milliseconds} ms elapsed", stopWatch.Elapsed.Milliseconds);
+
+            return Ok(Result.PostCreated);
         }
 
-        public async Task<bool> CheckIsPostCreated(Request.CreatePost createPost)
+        public async Task<bool> CheckIsPostCreated(Request.CreatePost request)
         {
+            //check is post is created
             
             return true;
-        }
-
-        private async Task<string> MakePictureUrlAsync(IFormFile file)
-        {
-            if (file is not {Length: > 0}) return string.Empty;
-
-            var picName = _fileSystem.GeneratePictureName(file.FileName);
-            var picture = file.ToArray();
-
-            if (!await _fileSystem.SavePictureAsync(picName, picture, FOLDER))
-                return string.Empty;
-
-            return _fileSystem.MakePictureUrl(picName, FOLDER);
         }
     }
 }

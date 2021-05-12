@@ -12,9 +12,8 @@ namespace Api.Endpoints.Posts
             [Required] 
             public string Body { get; set; }
             
-            // public IFormFile PostPicture { get; set; }
-            public List<IFormFile> PostPic { get; set; }
-
+            [Required]
+            public Student User { get; set; }
         }
     }
 }

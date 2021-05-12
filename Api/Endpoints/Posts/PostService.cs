@@ -5,7 +5,7 @@ namespace Api.Endpoints.Posts
 {
     public class PostService
     {
-        private async Task<Post> CreatePostAsync(string body, Student student)
+        public async Task<Post> CreatePostAsync(string body, Student student)
         {
             return new Post
             {

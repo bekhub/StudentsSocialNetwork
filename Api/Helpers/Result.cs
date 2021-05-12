@@ -9,6 +9,7 @@
         private const string EMAIL_REQUIRED = "Email required";
         private const string EMAIL_SENT = "Confirmation email sent";
         private const string POST_CREATED = "New post created";
+        private const string POST_NOT_CREATED = "New post couldn't created";
 
         /// <summary>
         /// User already registered
@@ -39,5 +40,9 @@
         /// Post created
         /// </summary>
         public static Result PostCreated => new(POST_CREATED);
+        /// <summary>
+        /// Post not created
+        /// </summary>
+        public static Result PostNotCreated => new(POST_NOT_CREATED);
     }
 }

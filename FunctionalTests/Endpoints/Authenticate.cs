@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Endpoints.Auth;
-using Core.Extensions;
+using Common.Extensions;
 using Infrastructure.Identity;
 using Xunit;
 

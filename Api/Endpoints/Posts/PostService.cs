@@ -22,23 +22,38 @@ namespace Api.Endpoints.Posts
             FOLDER = _FOLDER;
 
             var TagsList = new List<Tag>();
-            foreach (var tag in tags)
+            if (tags == null)
             {
-                var newTag = new Tag();
-                newTag.Name = tag;
-                newTag.PostTags = new List<PostTag>();
-                TagsList.Add(newTag);
+                TagsList = null;
+            }
+            else
+            {
+                foreach (var tag in tags)
+                {
+                    var newTag = new Tag();
+                    newTag.Name = tag;
+                    newTag.PostTags = new List<PostTag>();
+                    TagsList.Add(newTag);
+                }
             }
 
             var PostPicsList = new List<PostPicture>();
-            foreach (var postPics in postPictures)
-            {
-                var newPic = new PostPicture();
-                newPic.Url = await MakePictureUrlAsync(postPics);
-                
-                PostPicsList.Add(newPic);
-            }
             
+            if (postPictures == null)
+            {
+                PostPicsList = null;
+            }
+            else
+            {
+                foreach (var postPics in postPictures)
+                {
+                    var newPic = new PostPicture();
+                    newPic.Url = await MakePictureUrlAsync(postPics);
+                
+                    PostPicsList.Add(newPic);
+                }    
+            }
+
             return new Post
             {
                 Body = body,

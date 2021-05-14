@@ -10,6 +10,7 @@
         private const string EMAIL_SENT = "Confirmation email sent";
         private const string POST_CREATED = "New post created";
         private const string POST_NOT_CREATED = "New post couldn't created";
+        private const string POST_ERROR = "Post wasn't saved";
 
         /// <summary>
         /// User already registered
@@ -44,5 +45,10 @@
         /// Post not created
         /// </summary>
         public static Result PostNotCreated => new(POST_NOT_CREATED);
+        
+        /// <summary>
+        /// Post not saved
+        /// </summary>
+        public static Result PostError => new(POST_ERROR);
     }
 }

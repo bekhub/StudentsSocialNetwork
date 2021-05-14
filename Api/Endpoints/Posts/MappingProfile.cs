@@ -9,7 +9,10 @@ namespace Api.Endpoints.Posts
         {
             CreateMap<Request.CreatePost, Post>()
                 .ForMember(p => p.Body, option => option.Ignore())
+                .ForMember(p => p.IsDraft, option => option.Ignore())
                 .ForMember(p => p.UserId, option => option.Ignore())
+                .ForMember(p => p.Pictures, option => option.Ignore())
+                .ForMember(p => p.Tags, option => option.Ignore())
                 ;
         }
     }

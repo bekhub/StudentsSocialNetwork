@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,8 +7,10 @@ using Api.Helpers;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
 using Core.Entities;
+using Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -19,16 +22,22 @@ namespace Api.Endpoints.Posts
     {
         private readonly PostService _postService;
         private readonly ILogger<Posts> _logger;
+        private readonly IFileSystem _fileSystem;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
+        // private readonly UserManager<Post> _postManager;
 
-        public Posts(ILogger<Posts> logger, PostService postService, 
+        private const string FOLDER = "profiles_pictures";
+
+        public Posts(ILogger<Posts> logger, PostService postService, IFileSystem fileSystem, 
             IMapper mapper, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _mapper = mapper;
+            _fileSystem = fileSystem;
             _postService = postService;
             _userManager = userManager;
+            // _postManager = postManager;
         }
         
         [HttpPost("api/create-post")]
@@ -39,7 +48,7 @@ namespace Api.Endpoints.Posts
             Tags = new []{"Post.Create"})]
         
         public override async Task<ActionResult<Response.CreatePost>> HandleAsync(
-            Request.CreatePost request, CancellationToken cancellationToken = new ())
+            [FromForm] Request.CreatePost request, CancellationToken cancellationToken = new ())
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -47,8 +56,8 @@ namespace Api.Endpoints.Posts
 
             var post = _mapper.Map<Post>(request);
 
-            var createdPost = await _postService.CreatePostAsync(
-                request.Body, request.IsActive, request.IsDraft, request.UserID);
+            var createdPost = await _postService.CreatePostAsync(request.Body, request.IsDraft, request.UserID, 
+                request.Tags, request.PostPictures, _fileSystem, FOLDER);
             if (createdPost == null)
                 return BadRequest(Result.PostNotCreated);
             var userFound = await _userManager.FindByIdAsync(request.UserID);
@@ -57,15 +66,22 @@ namespace Api.Endpoints.Posts
 
             var user = await _userManager.FindByIdAsync(request.UserID);
             var username = user.UserName;
-            
+
+            if (request.IsDraft)
+                post.IsActive = false;
+            else
+                post.IsActive = true;
+
+            post.Pictures = new List<PostPicture>();
             post.CreatedAt = DateTime.UtcNow;
             post.Body = createdPost.Body;
-            post.IsActive = createdPost.IsActive;
-            post.IsDraft = createdPost.IsDraft;
             post.UserId = createdPost.UserId;
             post.User = user;
-            
-            _logger.LogWarning($"User {User} created post");
+
+            // var result = await _postManager.CreateAsync(post, user.PasswordHash);
+            // if (!result.Succeeded) return BadRequest(Result.PostError);
+            //
+            _logger.LogWarning($"User {user} created post");
             
             stopWatch.Stop();
             _logger.LogWarning("Creating post ended. {Milliseconds} ms elapsed", stopWatch.Elapsed.Milliseconds);
@@ -74,14 +90,8 @@ namespace Api.Endpoints.Posts
             {
                 Username = username,
                 PostBody = createdPost.Body,
+                Tags = request.Tags
             };
         }
-
-        // public async Task<bool> CheckIsPostCreated(Request.CreatePost request)
-        // {
-        //     //check is post is created
-        //     
-        //     return true;
-        // }
     }
 }

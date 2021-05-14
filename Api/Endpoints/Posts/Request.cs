@@ -9,12 +9,17 @@ namespace Api.Endpoints.Posts
     {
         public class CreatePost
         {
+            [Required]
             public string Body { get; set; }
-            
-            public bool IsActive { get; set; }
 
+            [Required]
             public bool IsDraft { get; set; }
+            
+            public List<IFormFile> PostPictures { get; set; }
+            
+            public List<string> Tags { get; set; }
 
+            [Required]
             public string UserID { get; set; }
         }
     }

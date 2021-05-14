@@ -1,6 +1,8 @@
 using System.IO;
 using Api.Configuration;
+using Api.Endpoints.Posts;
 using Autofac;
+using AutoMapper;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +34,11 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+            IMapper mapper = mappingConfig.CreateMapper();
             var currentAssembly = typeof(Startup).Assembly;
             services.AddCorsPolicy(CORS_POLICY);
             services.AddDbContexts(Configuration.GetConnectionString("DefaultConnection"));
@@ -44,6 +51,7 @@ namespace Api
             services.AddAutoMapper(currentAssembly);
             services.AddSwagger();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton(mapper);
             services.AddServices();
         }
 

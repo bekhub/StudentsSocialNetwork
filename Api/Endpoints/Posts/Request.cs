@@ -9,11 +9,13 @@ namespace Api.Endpoints.Posts
     {
         public class CreatePost
         {
-            [Required] 
             public string Body { get; set; }
             
-            [Required]
-            public Student User { get; set; }
+            public bool IsActive { get; set; }
+
+            public bool IsDraft { get; set; }
+
+            public string UserID { get; set; }
         }
     }
 }

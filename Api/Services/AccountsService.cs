@@ -5,13 +5,13 @@ namespace Api.Services
 {
     public class AccountsService
     {
-        private readonly IRestApiService _restApiService;
+        private readonly IObisApiService _obisApiService;
         private readonly IEncryptionService _encryptionService;
         private readonly SsnDbContext _ssnDbContext;
 
-        public AccountsService(IRestApiService restApiService, IEncryptionService encryptionService, SsnDbContext ssnDbContext)
+        public AccountsService(IObisApiService obisApiService, IEncryptionService encryptionService, SsnDbContext ssnDbContext)
         {
-            _restApiService = restApiService;
+            _obisApiService = obisApiService;
             _encryptionService = encryptionService;
             _ssnDbContext = ssnDbContext;
         }

@@ -5,8 +5,6 @@ using Api.Helpers.Extensions;
 using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Api.Endpoints.Posts
 {
@@ -14,7 +12,7 @@ namespace Api.Endpoints.Posts
     {
         private IFileSystem _fileSystem;
         private string FOLDER;
-        public async Task<Post> CreatePostAsync(string body, bool isDraft, string userId, List<string> tags, 
+        public async Task<Post> CreatePostAsync(string body, string userId, List<string> tags, 
             List<IFormFile> postPictures, IFileSystem fileSystem, string _FOLDER)
         {
 
@@ -32,6 +30,7 @@ namespace Api.Endpoints.Posts
                 {
                     var newTag = new Tag();
                     newTag.Name = tag;
+                    // need to find to which Post it belongs
                     newTag.PostTags = new List<PostTag>();
                     TagsList.Add(newTag);
                 }
@@ -47,6 +46,7 @@ namespace Api.Endpoints.Posts
             {
                 foreach (var postPics in postPictures)
                 {
+                    // need to find to which Post it belongs
                     var newPic = new PostPicture();
                     newPic.Url = await MakePictureUrlAsync(postPics);
                 
@@ -57,7 +57,6 @@ namespace Api.Endpoints.Posts
             return new Post
             {
                 Body = body,
-                IsDraft = isDraft,
                 Pictures = PostPicsList,
                 UserId = userId,
                 Tags = TagsList

@@ -13,14 +13,11 @@ namespace Api.Endpoints.Posts
             public string Body { get; set; }
 
             [Required]
-            public bool IsDraft { get; set; }
+            public string UserID { get; set; }
             
             public List<IFormFile> PostPictures { get; set; }
             
             public List<string> Tags { get; set; }
-
-            [Required]
-            public string UserID { get; set; }
         }
     }
 }

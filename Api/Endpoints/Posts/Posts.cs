@@ -10,7 +10,6 @@ using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -56,7 +55,7 @@ namespace Api.Endpoints.Posts
 
             var post = _mapper.Map<Post>(request);
 
-            var createdPost = await _postService.CreatePostAsync(request.Body, request.IsDraft, request.UserID, 
+            var createdPost = await _postService.CreatePostAsync(request.Body, request.UserID, 
                 request.Tags, request.PostPictures, _fileSystem, FOLDER);
             if (createdPost == null)
                 return BadRequest(Result.PostNotCreated);
@@ -67,20 +66,17 @@ namespace Api.Endpoints.Posts
             var user = await _userManager.FindByIdAsync(request.UserID);
             var username = user.UserName;
 
-            if (request.IsDraft)
-                post.IsActive = false;
-            else
-                post.IsActive = true;
-
             post.Pictures = new List<PostPicture>();
             post.CreatedAt = DateTime.UtcNow;
+            post.IsActive = true;
+            post.IsDraft = false;
             post.Body = createdPost.Body;
             post.UserId = createdPost.UserId;
             post.User = user;
 
-            // var result = await _postManager.CreateAsync(post, user.PasswordHash);
+            // var result = await _userManager.CreateAsync(user, user.PasswordHash);
             // if (!result.Succeeded) return BadRequest(Result.PostError);
-            //
+            
             _logger.LogWarning($"User {user} created post");
             
             stopWatch.Stop();

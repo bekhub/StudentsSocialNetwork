@@ -11,7 +11,7 @@ using Infrastructure;
 using Infrastructure.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
-using ObisRestClient;
+using RestServices;
 
 namespace Api
 {
@@ -36,7 +36,7 @@ namespace Api
             services.AddCorsPolicy(CORS_POLICY);
             services.AddDbContexts(Configuration.GetConnectionString("DefaultConnection"));
             services.AddInfrastructureServices(Configuration);
-            services.AddObisApiServices(Configuration.GetSection(nameof(ObisApiSettings)));
+            services.AddRestApiServices(Configuration);
             services.AddJwtIdentity(Configuration.GetSection(nameof(JwtConfiguration)));
             services.AddMvc()
                 .AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true)
@@ -44,6 +44,7 @@ namespace Api
             services.AddAutoMapper(currentAssembly);
             services.AddSwagger();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.Configure<CloudinarySettings>(Configuration.GetSection(nameof(CloudinarySettings)));
             services.AddServices();
         }
 

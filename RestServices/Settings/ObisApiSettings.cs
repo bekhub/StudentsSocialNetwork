@@ -1,4 +1,4 @@
-﻿namespace ObisRestClient
+﻿namespace RestServices.Settings
 {
     public class ObisApiSettings
     {

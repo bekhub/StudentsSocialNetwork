@@ -16,15 +16,15 @@ namespace Api.Services
     public class StudentsService
     {
         private readonly SsnDbContext _context;
-        private readonly IRestApiService _restApiService;
+        private readonly IObisApiService _obisApiService;
         private readonly ILogger<StudentsService> _logger;
         private readonly IEncryptionService _encryptionService;
 
-        public StudentsService(SsnDbContext ssnDbContext, IRestApiService restApiService,
+        public StudentsService(SsnDbContext ssnDbContext, IObisApiService obisApiService,
             IEncryptionService encryptionService, ILogger<StudentsService> logger)
         {
             _context = ssnDbContext;
-            _restApiService = restApiService;
+            _obisApiService = obisApiService;
             _encryptionService = encryptionService;
             _logger = logger;
         }
@@ -58,12 +58,12 @@ namespace Api.Services
             var studentNumber = student.StudentNumber;
             var studentPassword = await _encryptionService.DecryptAsync(student.StudentPassword);
 
-            var response = await _restApiService.AuthenticateAsync(studentNumber, studentPassword);
+            var response = await _obisApiService.AuthenticateAsync(studentNumber, studentPassword);
             if (response == null || string.IsNullOrEmpty(response.AuthKey))
                 throw new LogicException("Something went wrong :(. Student password can be invalid");
 
             student.AuthKey = response.AuthKey;
-            var takenLessons = await _restApiService.StudentTakenLessonsAsync();
+            var takenLessons = await _obisApiService.StudentTakenLessonsAsync();
             var studentCourses = await GetStudentCoursesAsync(takenLessons, student.Id);
             student.StudentCourses = studentCourses;
             await _context.SaveChangesAsync();
@@ -72,7 +72,7 @@ namespace Api.Services
         private async Task<List<StudentCourse>> GetStudentCoursesAsync(IEnumerable<StudentTakenLessons.Response> models,
             int studentId)
         {
-            var semesterNotes = await _restApiService.StudentSemesterNotesAsync();
+            var semesterNotes = await _obisApiService.StudentSemesterNotesAsync();
             var studentCourses = new List<StudentCourse>();
             foreach (var model in models)
             {

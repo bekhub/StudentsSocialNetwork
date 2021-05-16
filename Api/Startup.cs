@@ -1,8 +1,6 @@
 using System.IO;
 using Api.Configuration;
-using Api.Endpoints.Posts;
 using Autofac;
-using AutoMapper;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,7 +11,7 @@ using Infrastructure;
 using Infrastructure.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
-using ObisRestClient;
+using RestServices;
 
 namespace Api
 {
@@ -34,16 +32,11 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var mappingConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-            IMapper mapper = mappingConfig.CreateMapper();
             var currentAssembly = typeof(Startup).Assembly;
             services.AddCorsPolicy(CORS_POLICY);
             services.AddDbContexts(Configuration.GetConnectionString("DefaultConnection"));
             services.AddInfrastructureServices(Configuration);
-            services.AddObisApiServices(Configuration.GetSection(nameof(ObisApiSettings)));
+            services.AddRestApiServices(Configuration);
             services.AddJwtIdentity(Configuration.GetSection(nameof(JwtConfiguration)));
             services.AddMvc()
                 .AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true)
@@ -51,7 +44,7 @@ namespace Api
             services.AddAutoMapper(currentAssembly);
             services.AddSwagger();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton(mapper);
+            services.Configure<CloudinarySettings>(Configuration.GetSection(nameof(CloudinarySettings)));
             services.AddServices();
         }
 

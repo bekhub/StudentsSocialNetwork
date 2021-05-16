@@ -3,7 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Api.Services;
 using Core.Entities;
-using Core.Interfaces;
+using Core.Interfaces.Services;
+using Core.ObisApiModels;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,14 +14,16 @@ namespace Api.Endpoints.StudentAccount
     {
         private readonly SsnDbContext _context;
         private readonly StudentsService _studentsService;
-        private readonly IFireAndForgetHandler _fireAndForgetHandler;
+        private readonly IEncryptionService _encryptionService;
+        private readonly IObisApiService _obisApiService;
 
-        public StudentAccountService(SsnDbContext context, IFireAndForgetHandler fireAndForgetHandler,
-            StudentsService studentsService)
+        public StudentAccountService(SsnDbContext context,
+            StudentsService studentsService, IEncryptionService encryptionService, IObisApiService obisApiService)
         {
             _context = context;
-            _fireAndForgetHandler = fireAndForgetHandler;
             _studentsService = studentsService;
+            _encryptionService = encryptionService;
+            _obisApiService = obisApiService;
         }
         
         public async Task SynchronizeStudentCoursesAsync(string userId)
@@ -56,6 +59,16 @@ namespace Api.Endpoints.StudentAccount
                             x.AcademicYear == StudentCourse.CurrentAcademicYear &&
                             x.Semester == StudentCourse.CurrentSemester)
                 .ToListAsync();
+        }
+
+        public async Task<bool> CheckStudentPasswordAsync(string studentNumber, string studentPassword)
+        {
+            var response = await _obisApiService.AuthenticateAsync(new Authenticate.Request
+            {
+                Number = studentNumber,
+                Password = studentPassword,
+            });
+            return response != null && !string.IsNullOrEmpty(response.AuthKey);
         }
     }
 }

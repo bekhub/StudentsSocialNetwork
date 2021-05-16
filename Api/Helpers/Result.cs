@@ -1,13 +1,9 @@
-﻿namespace Api.Helpers
+﻿using Api.Resources;
+
+namespace Api.Helpers
 {
     public record Result(string Message)
     {
-        private const string USER_EXISTS = "User already registered";
-        private const string USER_NOT_FOUND = "User not found";
-        private const string REGISTER_ERROR = "Error during registering user";
-        private const string REGISTER_SUCCESS = "User created";
-        private const string EMAIL_REQUIRED = "Email required";
-        private const string EMAIL_SENT = "Confirmation email sent";
         private const string POST_CREATED = "New post created";
         private const string POST_NOT_CREATED = "New post couldn't created";
         private const string POST_ERROR = "Post wasn't saved";
@@ -17,28 +13,43 @@
         /// <summary>
         /// User already registered
         /// </summary>
-        public static Result UserExists => new (USER_EXISTS);
+        public static Result UserExists => new (DefaultResource.UserExists);
         /// <summary>
         /// Error during registering user
         /// </summary>
-        public static Result RegisterError => new (REGISTER_ERROR);
+        public static Result RegisterError => new (DefaultResource.RegisterError);
         /// <summary>
         /// User created
         /// </summary>
-        public static Result RegisterSuccess => new (REGISTER_SUCCESS);
+        public static Result RegisterSuccess => new (DefaultResource.RegisterSuccess);
         /// <summary>
         /// User not found
         /// </summary>
-        public static Result UserNotFound => new(USER_NOT_FOUND);
+        public static Result UserNotFound => new(DefaultResource.UserNotFound);
         /// <summary>
         /// Email required
         /// </summary>
-        public static Result EmailRequired => new(EMAIL_REQUIRED);
+        public static Result EmailRequired => new(DefaultResource.EmailRequired);
         /// <summary>
         /// Confirmation email sent
         /// </summary>
-        public static Result EmailSent => new(EMAIL_SENT);
-
+        public static Result EmailSent => new(DefaultResource.EmailSent);
+        /// <summary>
+        /// Password has been changed
+        /// </summary>
+        public static Result PasswordChanged => new(DefaultResource.PasswordChanged);
+        /// <summary>
+        /// Password has been updated
+        /// </summary>
+        public static Result PasswordUpdated => new(DefaultResource.PasswordChanged);
+        /// <summary>
+        /// Invalid password
+        /// </summary>
+        public static Result InvalidPassword => new(DefaultResource.InvalidPassword);
+        /// <summary>
+        /// Error while changing password
+        /// </summary>
+        public static Result PasswordError => new(DefaultResource.PasswordError);
         /// <summary>
         /// Post created
         /// </summary>
@@ -47,17 +58,14 @@
         /// Post not created
         /// </summary>
         public static Result PostNotCreated => new(POST_NOT_CREATED);
-        
         /// <summary>
         /// Post not saved
         /// </summary>
         public static Result PostError => new(POST_ERROR);
-        
         /// <summary>
         /// User didn't authorize
         /// </summary>
         public static Result NotAuthorized => new(NOT_AUTHORIZED);
-        
         /// <summary>
         /// Post doesn't found
         /// </summary>

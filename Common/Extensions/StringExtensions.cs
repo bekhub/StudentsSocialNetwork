@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Common.Extensions
 {
@@ -17,6 +18,11 @@ namespace Common.Extensions
         public static int? AsIntOrNull(this string number)
         {
             return string.IsNullOrEmpty(number) ? null : number.AsInt();
+        }
+        
+        public static string GeneratePictureName(this string pictureName)
+        {
+            return $"{Guid.NewGuid()}{Path.GetExtension(pictureName)}";
         }
     }
 }

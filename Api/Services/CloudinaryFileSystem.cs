@@ -26,6 +26,7 @@ namespace Api.Services
         public async Task<string> SavePictureAsync(string pictureName, byte[] picture, string folder = "")
         {
             if (!picture.IsValidImage(pictureName)) return null;
+            pictureName = pictureName.GeneratePictureName();
             
             await using var stream = new MemoryStream(picture);
             var uploadParams = new ImageUploadParams

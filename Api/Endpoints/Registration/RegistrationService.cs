@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Api.Helpers.Extensions;
 using Api.Services;
+using Common.Extensions;
 using Core.Entities;
 using Core.Interfaces;
 using Core.Interfaces.Services;
@@ -108,7 +109,7 @@ namespace Api.Endpoints.Registration
         {
             if (file is not {Length: > 0}) return string.Empty;
 
-            var picName = GeneratePictureName(file.FileName);
+            var picName = file.FileName.GeneratePictureName();
             var picture = file.ToArray();
 
             var pictureUrl = await _fileSystem.SavePictureAsync(picName, picture, folder);
@@ -119,11 +120,6 @@ namespace Api.Endpoints.Registration
         private static string GetStudentEmail(string studentNumber)
         {
             return $"{studentNumber}@manas.edu.kg";
-        }
-        
-        private static string GeneratePictureName(string pictureName)
-        {
-            return $"{Guid.NewGuid()}{Path.GetExtension(pictureName)}";
         }
     }
 }

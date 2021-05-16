@@ -7,6 +7,7 @@ using Api.Helpers;
 using Api.Helpers.Extensions;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
+using Common.Extensions;
 using Core.Entities;
 using Core.Interfaces;
 using Core.Interfaces.Services;
@@ -59,91 +60,77 @@ namespace Api.Endpoints.Posts
             var post = _mapper.Map<Posts.Request.CreatePost, Post>(request);
             post.User = await _currentUserAccessor.GetCurrentUserAsync(cancellationToken);
 
-            if (post.User != null)
+            if (post.User == null) return BadRequest(Result.NotAuthorized);
+            
+            var user = post.User;
+            var tags = request.Tags;
+            var postPictures = request.PostPictures;
+
+            post.CreatedAt = DateTime.UtcNow;
+            post.UpdatedAt = DateTime.UtcNow;
+            post.IsActive = true;
+            post.IsDraft = false;
+            post.Body = request.Body;
+            post.UserId = user.Id;
+            post.User = user;
+            
+            await _context.Posts.AddAsync(post, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+                
+            var tagsList = new List<Tag>();
+            if (tags == null)
+                tagsList = null;
+            else
             {
-                var user = post.User;
-                var tags = request.Tags;
-                var postPictures = request.PostPictures;
-
-                post.CreatedAt = DateTime.UtcNow;
-                post.UpdatedAt = DateTime.UtcNow;
-                post.IsActive = true;
-                post.IsDraft = false;
-                post.Body = request.Body;
-                post.UserId = user.Id;
-                post.User = user;
-            
-                await _context.Posts.AddAsync(post, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-                
-                var TagsList = new List<Tag>();
-                if (tags == null)
-                    TagsList = null;
-                else
+                foreach (var tag in tags)
                 {
-                    foreach (var tag in tags)
+                    var newTag = new Tag {Name = tag};
+                    // need to find to which Post it belongs
+                    var newPostTag = new PostTag
                     {
-                        var newTag = new Tag();
-                        newTag.Name = tag;
-                        // need to find to which Post it belongs
-                        var NewPostTag = new PostTag();
-                        NewPostTag.Post = post;
-                        NewPostTag.PostId = post.Id;
-                        NewPostTag.Tag = newTag;
-                        NewPostTag.TagId = newTag.Id;
-                        var NewPostTagList = new List<PostTag>();
-                        NewPostTagList.Add(NewPostTag);
-                        newTag.PostTags = NewPostTagList;
-                        TagsList.Add(newTag);
-                    }
+                        Post = post, 
+                        PostId = post.Id, 
+                        Tag = newTag, 
+                        TagId = newTag.Id,
+                    };
+                    var newPostTagList = new List<PostTag> {newPostTag};
+                    newTag.PostTags = newPostTagList;
+                    tagsList.Add(newTag);
                 }
-                
-                post.Tags = TagsList;
-                
-                var PostPicsList = new List<PostPicture>();
-                var PostPicsUrls = new List<string>();
-            
-                if (postPictures == null)
-                    PostPicsList = null;
-                else
-                {
-                    foreach (var postPics in postPictures)
-                    {
-                        // need to find to which Post it belongs
-                        var newPic = new PostPicture();
-                        newPic.Url = await MakePictureUrlAsync(postPics);
-                        
-                        PostPicsUrls.Add(newPic.Url);
-                        PostPicsList.Add(newPic);
-                    }    
-                }
-                post.Pictures = PostPicsList;
-                
-                await _context.SaveChangesAsync(cancellationToken);
-                
-                return new Response.CreatePost()
-                {
-                    Username = user.UserName,
-                    PostBody = post.Body,
-                    Tags = request.Tags,
-                    Pics = PostPicsUrls
-                };
             }
+                
+            post.Tags = tagsList;
+                
+            var postPicsList = new List<PostPicture>();
+            var postPicsUrls = new List<string>();
+            
+            if (postPictures == null)
+                postPicsList = null;
+            else
+            {
+                foreach (var file in postPictures)
+                {
+                    // need to find to which Post it belongs
+                    var newPic = new PostPicture
+                    {
+                        Url = await _fileSystem.SavePictureAsync(file.FileName, file.ToArray(), FOLDER)
+                    };
 
-            return BadRequest(Result.NotAuthorized);
-        }
-        
-        private async Task<string> MakePictureUrlAsync(IFormFile file)
-        {
-            if(file is not {Length: > 0}) return  string.Empty;
-
-            var picName = _fileSystem.GeneratePictureName(file.FileName);
-            var picture = file.ToArray();
-
-            if (!await _fileSystem.SavePictureAsync(picName, picture, FOLDER))
-                return string.Empty;
-
-            return _fileSystem.MakePictureUrl(picName, FOLDER);
+                    postPicsUrls.Add(newPic.Url);
+                    postPicsList.Add(newPic);
+                }    
+            }
+            post.Pictures = postPicsList;
+                
+            await _context.SaveChangesAsync(cancellationToken);
+                
+            return new Response.CreatePost()
+            {
+                Username = user.UserName,
+                PostBody = post.Body,
+                Tags = request.Tags,
+                Pics = postPicsUrls,
+            };
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Api.Services
         public async Task<string> SavePictureAsync(string pictureName, byte[] picture, string folder = "")
         {
             if (!picture.IsValidImage(pictureName)) return null;
+            pictureName = pictureName.GeneratePictureName();
             
             var folderPath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/images", folder);
             var fullPath = Path.Combine(folderPath, pictureName);

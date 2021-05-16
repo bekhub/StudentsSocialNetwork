@@ -55,9 +55,9 @@ namespace Api.Endpoints.Posts
                         _context.Tags.Remove(tag);
                 }
             }
-            foreach (var pics in post.Pictures)
+            foreach (var picture in post.Pictures)
             {
-                _fileSystem.DeletePicture(_fileSystem.GeneratePictureName(pics.Url), FOLDER);
+                _fileSystem.DeletePicture(picture.Url, FOLDER);
             }
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync(cancellationToken);

@@ -3,10 +3,12 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Helpers;
+using Api.Helpers.Extensions;
 using Api.Services;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
 using Core.Entities;
+using Core.Interfaces;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,18 +25,20 @@ namespace Api.Endpoints.Registration
         private readonly RegistrationService _registrationService;
         private readonly ILogger<RegisterTest> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IFileSystem _fileSystem;
         private readonly IMapper _mapper;
 
         private const string FOLDER = "profiles_pictures";
 
         public RegisterTest(EmailService emailService, IMapper mapper, UserManager<ApplicationUser> userManager, 
-            ILogger<RegisterTest> logger, RegistrationService registrationService)
+            ILogger<RegisterTest> logger, RegistrationService registrationService, IFileSystem fileSystem)
         {
             _emailService = emailService;
             _mapper = mapper;
             _userManager = userManager;
             _logger = logger;
             _registrationService = registrationService;
+            _fileSystem = fileSystem;
         }
 
         [HttpPost("api/register-test")]
@@ -54,7 +58,8 @@ namespace Api.Endpoints.Registration
 
             var user = _mapper.Map<ApplicationUser>(request);
             user.SignUpDate = DateTime.UtcNow;
-            user.ProfilePictureUrl = await _registrationService.MakePictureUrlAsync(request.ProfilePicture, FOLDER);
+            var file = request.ProfilePicture;
+            user.ProfilePictureUrl = await _fileSystem.SavePictureAsync(file.FileName, file.ToArray(), FOLDER);
             
             var student = await _registrationService.GetUnregisteredStudentAsync(request.StudentNumber, request.StudentPassword);
             if (student == null) return BadRequest(Result.RegisterError);

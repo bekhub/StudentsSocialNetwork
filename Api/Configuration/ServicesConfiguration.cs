@@ -1,4 +1,5 @@
-﻿using Api.Endpoints.Registration;
+﻿using Api.Endpoints.Posts;
+using Api.Endpoints.Registration;
 using Api.Endpoints.StudentAccount;
 using Api.Helpers;
 using Api.Services;
@@ -16,6 +17,7 @@ namespace Api.Configuration
             services.AddScoped<RegistrationService>();
             services.AddScoped<StudentAccountService>();
             services.AddScoped<IFileSystem, CloudinaryFileSystem>();
+            services.AddScoped<PostService>();
             services.AddTransient<IFireAndForgetHandler, FireAndForgetHandler>();
         }
     }

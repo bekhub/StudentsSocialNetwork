@@ -11,6 +11,7 @@
         private const string POST_CREATED = "New post created";
         private const string POST_NOT_CREATED = "New post couldn't created";
         private const string POST_ERROR = "Post wasn't saved";
+        private const string NOT_AUTHORIZED = "First authorize, then create posts!";
 
         /// <summary>
         /// User already registered
@@ -50,5 +51,10 @@
         /// Post not saved
         /// </summary>
         public static Result PostError => new(POST_ERROR);
+        
+        /// <summary>
+        /// User didn't authorize
+        /// </summary>
+        public static Result NotAuthorized => new(NOT_AUTHORIZED);
     }
 }

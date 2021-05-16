@@ -4,26 +4,31 @@ using System.Threading.Tasks;
 using Api.Helpers.Extensions;
 using Core.Entities;
 using Core.Interfaces;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 
 namespace Api.Endpoints.Posts
 {
     public class PostService
     {
-        private IFileSystem _fileSystem;
-        private string FOLDER;
-        public async Task<Post> CreatePostAsync(string body, string userId, List<string> tags, 
-            List<IFormFile> postPictures, IFileSystem fileSystem, string _FOLDER)
-        {
+        private readonly SsnDbContext _context;
+        private readonly IFileSystem _fileSystem;
+        
+        private const string FOLDER = "profiles_pictures";
 
+        public PostService(SsnDbContext context, IFileSystem fileSystem)
+        {
+            _context = context;
             _fileSystem = fileSystem;
-            FOLDER = _FOLDER;
+        }
+        
+        public async Task<Post> CheckPostAsync(string body, List<string> tags, 
+            List<IFormFile> postPictures)
+        {
 
             var TagsList = new List<Tag>();
             if (tags == null)
-            {
                 TagsList = null;
-            }
             else
             {
                 foreach (var tag in tags)
@@ -39,9 +44,7 @@ namespace Api.Endpoints.Posts
             var PostPicsList = new List<PostPicture>();
             
             if (postPictures == null)
-            {
                 PostPicsList = null;
-            }
             else
             {
                 foreach (var postPics in postPictures)
@@ -58,7 +61,6 @@ namespace Api.Endpoints.Posts
             {
                 Body = body,
                 Pictures = PostPicsList,
-                UserId = userId,
                 Tags = TagsList
             };
         }

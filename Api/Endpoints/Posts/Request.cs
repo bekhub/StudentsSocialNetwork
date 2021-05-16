@@ -12,9 +12,6 @@ namespace Api.Endpoints.Posts
             [Required]
             public string Body { get; set; }
 
-            [Required]
-            public string UserID { get; set; }
-            
             public List<IFormFile> PostPictures { get; set; }
             
             public List<string> Tags { get; set; }

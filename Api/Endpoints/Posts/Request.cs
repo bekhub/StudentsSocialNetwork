@@ -21,5 +21,17 @@ namespace Api.Endpoints.Posts
         {
             public int Id { get; set; }
         }
+
+        public class UpdatePost
+        {
+            public int Id { get; set; }
+
+            public string Body { get; set; }
+        }
+        
+        public class ShowPost
+        {
+            public int Id { get; set; }
+        }
     }
 }

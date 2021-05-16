@@ -45,7 +45,7 @@ namespace Api.Endpoints.Posts
             Summary = "Create a post",
             Description = "Create a post",
             OperationId = "post.create",
-            Tags = new []{"Post.Create"})]
+            Tags = new []{"Posts"})]
         
         public override async Task<ActionResult<Response.CreatePost>> HandleAsync(
             [FromForm] Request.CreatePost request, CancellationToken cancellationToken = new ())

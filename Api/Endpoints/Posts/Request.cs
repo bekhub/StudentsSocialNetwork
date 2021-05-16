@@ -16,5 +16,10 @@ namespace Api.Endpoints.Posts
             
             public List<string> Tags { get; set; }
         }
+        
+        public class DeletePost
+        {
+            public int Id { get; set; }
+        }
     }
 }

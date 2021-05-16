@@ -25,7 +25,7 @@ namespace Api.Endpoints.Posts
             _mapper = mapper;
         }
         
-        [HttpPost("api/list-post")]
+        [HttpGet("api/list-post")]
         [SwaggerOperation(
             Summary = "Show all posts",
             Description = "Show all posts",
@@ -37,6 +37,9 @@ namespace Api.Endpoints.Posts
             List<Post> list = new List<Post>();
 
             list = await _context.Posts
+                .OrderByDescending(x =>x.UpdatedAt)
+                // .Include(x => x.Tags)
+                // .Include(x => x.User)
                 .ToListAsync(cancellationToken);
 
             return new Response.ListPosts()

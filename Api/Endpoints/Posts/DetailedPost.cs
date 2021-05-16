@@ -32,6 +32,8 @@ namespace Api.Endpoints.Posts
         {
             var post = await _context.Posts
                 .Where(p => p.Id == request.Id)
+                // .Include(x => x.Tags)
+                // .Include(x => x.User)
                 .FirstOrDefaultAsync(cancellationToken);
             
             if(post == null)

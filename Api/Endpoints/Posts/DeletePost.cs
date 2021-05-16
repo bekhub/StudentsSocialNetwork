@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Api.Helpers;
 using Ardalis.ApiEndpoints;
 using Core.Entities;
+using Core.Interfaces;
 using Infrastructure.Data;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +21,14 @@ namespace Api.Endpoints.Posts
         .WithoutResponse
     {
         private readonly SsnDbContext _context;
+        private readonly IFileSystem _fileSystem;
 
-        public DeletePost(SsnDbContext context)
+        private const string FOLDER = "post_pictures";
+
+        public DeletePost(SsnDbContext context, IFileSystem fileSystem)
         {
             _context = context;
+            _fileSystem = fileSystem;
         }
         
         [HttpDelete("api/delete-post")]
@@ -42,6 +47,18 @@ namespace Api.Endpoints.Posts
             if (post == null)
                 return BadRequest(Result.PostNotFound);
 
+            foreach (var tag in post.Tags)
+            {
+                foreach (var postTag in tag.PostTags)
+                {
+                    if(postTag.PostId == post.Id)
+                        _context.Tags.Remove(tag);
+                }
+            }
+            foreach (var pics in post.Pictures)
+            {
+                _fileSystem.DeletePicture(_fileSystem.GeneratePictureName(pics.Url), FOLDER);
+            }
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync(cancellationToken);
 

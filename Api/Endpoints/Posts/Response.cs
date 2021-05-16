@@ -12,6 +12,8 @@ namespace Api.Endpoints.Posts
             public string PostBody { get; set; }    
             
             public List<string> Tags { get; set; }
+            
+            public List<string> Pics { get; set; }
         }
         
         public class ShowPost

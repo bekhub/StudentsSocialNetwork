@@ -13,13 +13,19 @@ namespace Core.Entities
 
         public int LikesCount => CommentLikes.Count;
 
-        public int CommentsCount => CommentReplies.Count;
+        public int CommentsCount => Replies.Count;
 
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
+        
+        public int? TargetId { get; set; }
+        public Comment Target { get; set; }
+
+        public int? PostId { get; set; }
+        public Post Post { get; set; }
 
         public List<CommentLike> CommentLikes { get; set; } = new();
-
-        public List<CommentReply> CommentReplies { get; set; } = new();
+        
+        public List<Comment> Replies { get; set; } = new();
     }
 }

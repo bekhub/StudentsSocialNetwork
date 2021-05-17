@@ -12,9 +12,10 @@ namespace Infrastructure.Data.Configurations
                 .IsRequired();
             builder.Property(x => x.UserId)
                 .IsRequired();
-            builder.HasMany(x => x.CommentReplies)
+            builder.HasMany(x => x.Replies)
                 .WithOne(x => x.Target)
-                .HasForeignKey(x => x.TargetId);
+                .HasForeignKey(x => x.TargetId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

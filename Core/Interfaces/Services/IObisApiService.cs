@@ -4,7 +4,7 @@ using Core.ObisApiModels;
 
 namespace Core.Interfaces.Services
 {
-    public interface IRestApiService
+    public interface IObisApiService
     {
         Task<Authenticate.Response> AuthenticateAsync(Authenticate.Request request);
         

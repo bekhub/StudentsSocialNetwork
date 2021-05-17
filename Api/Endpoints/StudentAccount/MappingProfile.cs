@@ -12,6 +12,10 @@ namespace Api.Endpoints.StudentAccount
                     expression => expression.MapFrom(x => $"{x.Firstname} {x.Lastname}"))
                 .ForMember(x => x.Email,
                     expression => expression.MapFrom(x => x.User.Email))
+                .ForMember(x => x.Username, 
+                    expression => expression.MapFrom(x => x.User.UserName))
+                .ForMember(x => x.ProfilePictureUrl, 
+                    expression => expression.MapFrom(x => x.User.ProfilePictureUrl))
                 .ForMember(x => x.Birthdate,
                     expression => expression.MapFrom(x => x.BirthDate))
                 .ForMember(x => x.Department,

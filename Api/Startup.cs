@@ -11,7 +11,7 @@ using Infrastructure;
 using Infrastructure.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
-using ObisRestClient;
+using RestServices;
 
 namespace Api
 {
@@ -19,15 +19,12 @@ namespace Api
     {
         private const string CORS_POLICY = "CorsPolicy";
         
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _environment = environment;
         }
 
         public IConfiguration Configuration { get; }
-
-        private readonly IWebHostEnvironment _environment;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -36,7 +33,7 @@ namespace Api
             services.AddCorsPolicy(CORS_POLICY);
             services.AddDbContexts(Configuration.GetConnectionString("DefaultConnection"));
             services.AddInfrastructureServices(Configuration);
-            services.AddObisApiServices(Configuration.GetSection(nameof(ObisApiSettings)));
+            services.AddRestApiServices(Configuration);
             services.AddJwtIdentity(Configuration.GetSection(nameof(JwtConfiguration)));
             services.AddMvc()
                 .AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true)
@@ -44,6 +41,7 @@ namespace Api
             services.AddAutoMapper(currentAssembly);
             services.AddSwagger();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.Configure<CloudinarySettings>(Configuration.GetSection(nameof(CloudinarySettings)));
             services.AddServices();
         }
 

@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Core.Interfaces.Services;
 using Core.ObisApiModels;
+using Microsoft.Extensions.Options;
+using RestServices.Settings;
 
-namespace ObisRestClient
+namespace RestServices.Services
 {
-    public class RestApiService : IRestApiService
+    public class ObisApiService : BaseHttpService, IObisApiService
     {
-        private readonly HttpService _httpService;
-        
         private const string AUTHENTICATE = "authenticate";
         private const string MAIN_INFO = "main-info";
         private const string STUDENT_INFO = "student-info";
@@ -17,17 +19,19 @@ namespace ObisRestClient
         private const string STUDENT_SEMESTER_NOTES = "student-semester-notes";
         private const string CHANGE_PASSWORD = "change-password";
         private const string WAKE_UP = "wake-up";
-
-        public RestApiService(HttpService httpService)
+        
+        public ObisApiService(HttpClient httpClient, IOptions<ObisApiSettings> apiSettingsOptions) : base(httpClient)
         {
-            _httpService = httpService;
+            var apiSettings = apiSettingsOptions.Value;
+            HttpClient.BaseAddress = new Uri(apiSettings.BaseUrl);
+            HttpClient.DefaultRequestHeaders.Add("appKey", apiSettings.AppKey);
         }
 
         public async Task<Authenticate.Response> AuthenticateAsync(Authenticate.Request request)
         {
-            var response = await _httpService.PostAsync<Authenticate.Response>(AUTHENTICATE, request);
+            var response = await PostAsync<Authenticate.Response>(AUTHENTICATE, request);
             if (response != null && !string.IsNullOrEmpty(response.AuthKey))
-                _httpService.SetAuthKey(response.AuthKey);
+                SetAuthKey(response.AuthKey);
             return response;
         }
 
@@ -42,42 +46,42 @@ namespace ObisRestClient
 
         public Task<MainInfo.Response> MainInfoAsync()
         {
-            return _httpService.GetAsync<MainInfo.Response>(MAIN_INFO);
+            return GetAsync<MainInfo.Response>(MAIN_INFO);
         }
 
         public Task<StudentInfo.Response> StudentInfoAsync()
         {
-            return _httpService.GetAsync<StudentInfo.Response>(STUDENT_INFO);
+            return GetAsync<StudentInfo.Response>(STUDENT_INFO);
         }
 
         public Task<List<StudentTakenLessons.Response>> StudentTakenLessonsAsync()
         {
-            return _httpService.GetAsync<List<StudentTakenLessons.Response>>(STUDENT_TAKEN_LESSONS);
+            return GetAsync<List<StudentTakenLessons.Response>>(STUDENT_TAKEN_LESSONS);
         }
 
         public Task<StudentTranscript.Response> StudentTranscriptAsync()
         {
-            return _httpService.GetAsync<StudentTranscript.Response>(STUDENT_TRANSCRIPT);
+            return GetAsync<StudentTranscript.Response>(STUDENT_TRANSCRIPT);
         }
 
         public Task<StudentSemesterNotes.Response> StudentSemesterNotesAsync()
         {
-            return _httpService.GetAsync<StudentSemesterNotes.Response>(STUDENT_SEMESTER_NOTES);
+            return GetAsync<StudentSemesterNotes.Response>(STUDENT_SEMESTER_NOTES);
         }
 
         public Task<ChangePassword.Response> ChangePasswordAsync(ChangePassword.Request request)
         {
-            return _httpService.PutAsync<ChangePassword.Response>(CHANGE_PASSWORD, request);
+            return PutAsync<ChangePassword.Response>(CHANGE_PASSWORD, request);
         }
 
         public Task<WakeUp.Response> WakeUpAsync()
         {
-            return _httpService.GetAsync<WakeUp.Response>(WAKE_UP);
+            return GetAsync<WakeUp.Response>(WAKE_UP);
         }
 
         public void SetAuthKey(string authKey)
         {
-            _httpService.SetAuthKey(authKey);
+            HttpClient.DefaultRequestHeaders.Add("Authorization", authKey);
         }
     }
 }

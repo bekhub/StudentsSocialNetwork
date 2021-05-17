@@ -13,6 +13,7 @@
     <PackageReference Include="Ardalis.Result.FluentValidation" Version="3.0.1" />
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="CloudinaryDotNet" Version="1.15.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="10.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
@@ -35,15 +36,32 @@
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\ObisRestClient\ObisRestClient.csproj" />
+    <ProjectReference Include="..\RestServices\RestServices.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Endpoints\Comments" />
     <Folder Include="wwwroot\images" />
+    <Folder Include="wwwroot\images\profiles_pictures" />
   </ItemGroup>
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Pages\Home\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\DefaultResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DefaultResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\DefaultResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <Target Name="CreateStaticFilesFolder" AfterTargets="AfterPublish">

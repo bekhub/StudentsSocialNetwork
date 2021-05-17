@@ -4,13 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Api.Helpers;
 using Api.Helpers.Extensions;
+using Api.Resources;
 using Api.Services;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -24,22 +24,22 @@ namespace Api.Endpoints.Registration
     {
         private readonly EmailService _emailService;
         private readonly RegistrationService _registrationService;
-        private readonly IFileSystem _fileSystem;
         private readonly ILogger<RegisterTest> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IFileSystem _fileSystem;
         private readonly IMapper _mapper;
 
         private const string FOLDER = "profiles_pictures";
 
         public RegisterTest(EmailService emailService, IMapper mapper, UserManager<ApplicationUser> userManager, 
-            ILogger<RegisterTest> logger, IFileSystem fileSystem, RegistrationService registrationService)
+            ILogger<RegisterTest> logger, RegistrationService registrationService, IFileSystem fileSystem)
         {
             _emailService = emailService;
             _mapper = mapper;
             _userManager = userManager;
             _logger = logger;
-            _fileSystem = fileSystem;
             _registrationService = registrationService;
+            _fileSystem = fileSystem;
         }
 
         [HttpPost("api/register-test")]
@@ -55,14 +55,15 @@ namespace Api.Endpoints.Registration
             stopWatch.Start();
             _logger.LogWarning("Registration start");
             if (await CheckIsUserRegistered(request))
-                return BadRequest(Result.UserExists);
+                return BadRequest(Result.From(DefaultResource.UserExists));
 
             var user = _mapper.Map<ApplicationUser>(request);
             user.SignUpDate = DateTime.UtcNow;
-            user.ProfilePictureUrl = await MakePictureUrlAsync(request.ProfilePicture);
+            var file = request.ProfilePicture;
+            user.ProfilePictureUrl = await _fileSystem.SavePictureAsync(file.FileName, file.ToArray(), FOLDER);
             
             var student = await _registrationService.GetUnregisteredStudentAsync(request.StudentNumber, request.StudentPassword);
-            if (student == null) return BadRequest(Result.RegisterError);
+            if (student == null) return BadRequest(Result.From(DefaultResource.RegisterError));
 
             user.Firstname = student.Firstname;
             user.Lastname = student.Lastname;
@@ -77,7 +78,7 @@ namespace Api.Endpoints.Registration
             stopWatch.Stop();
             _logger.LogWarning("Registration end. {Milliseconds} ms elapsed", stopWatch.Elapsed.Milliseconds);
 
-            return Ok(Result.RegisterSuccess);
+            return Ok(Result.From(DefaultResource.RegisterSuccess));
         }
 
         private async Task<bool> CheckIsUserRegistered(Request.Register request)
@@ -89,19 +90,6 @@ namespace Api.Endpoints.Registration
             
             await _emailService.SendAlreadyRegisteredEmailAsync(request.Email, Request.Host.Value);
             return true;
-        }
-
-        private async Task<string> MakePictureUrlAsync(IFormFile file)
-        {
-            if (file is not {Length: > 0}) return string.Empty;
-
-            var picName = _fileSystem.GeneratePictureName(file.FileName);
-            var picture = file.ToArray();
-
-            if (!await _fileSystem.SavePictureAsync(picName, picture, FOLDER))
-                return string.Empty;
-            
-            return _fileSystem.MakePictureUrl(picName, FOLDER);
         }
 
         public class RequestValidator : AbstractValidator<Request.Register>

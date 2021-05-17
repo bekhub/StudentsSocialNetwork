@@ -31,7 +31,7 @@ namespace Api
                 catch (Exception e)
                 {
                     var logger = loggerFactory.CreateLogger<Program>();
-                    logger.LogError(e, "An error occurred seeding the DB.");
+                    logger.LogError(e, "An error occurred seeding the DB");
                 }
             }
             

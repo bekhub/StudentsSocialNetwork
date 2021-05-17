@@ -12,12 +12,12 @@ namespace Api.Controllers
     public class MetaController : ControllerBase
     {
         private readonly ICurrentUserAccessor _userAccessor;
-        private readonly IRestApiService _restApiService;
+        private readonly IObisApiService _obisApiService;
 
-        public MetaController(ICurrentUserAccessor userAccessor, IRestApiService restApiService)
+        public MetaController(ICurrentUserAccessor userAccessor, IObisApiService obisApiService)
         {
             _userAccessor = userAccessor;
-            _restApiService = restApiService;
+            _obisApiService = obisApiService;
         }
 
         [HttpGet("info")]
@@ -51,7 +51,7 @@ namespace Api.Controllers
         [HttpGet("wake-up")]
         public Task<WakeUp.Response> WakeUp()
         {
-            return _restApiService.WakeUpAsync();
+            return _obisApiService.WakeUpAsync();
         }
     }
 }

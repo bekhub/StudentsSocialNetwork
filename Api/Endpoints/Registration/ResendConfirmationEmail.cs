@@ -33,17 +33,17 @@ namespace Api.Endpoints.Registration
         public override async Task<ActionResult<Result>> HandleAsync(string email, 
             CancellationToken cancellationToken = new())
         {
-            if (string.IsNullOrEmpty(email)) return BadRequest(Result.From(DefaultResource.EmailRequired));
+            if (string.IsNullOrEmpty(email)) return BadRequest(Result.From(Resource.EmailRequired));
             var host = Request.Host.Value;
 
             var user = await _userManager.FindByEmailAsync(email);
 
-            if (user == null) return BadRequest(Result.From(DefaultResource.UserNotFound));
+            if (user == null) return BadRequest(Result.From(Resource.UserNotFound));
             
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _emailService.SendVerificationEmailAsync(user.Email, verificationToken, host);
 
-            return Ok(Result.From(DefaultResource.EmailSent));
+            return Ok(Result.From(Resource.EmailSent));
         }
     }
 }

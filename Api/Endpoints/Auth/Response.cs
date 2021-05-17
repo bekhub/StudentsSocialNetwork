@@ -1,4 +1,6 @@
-﻿namespace Api.Endpoints.Auth
+﻿using System;
+
+namespace Api.Endpoints.Auth
 {
     public class Response
     {
@@ -10,7 +12,11 @@
             
             public string JwtToken { get; set; }
 
+            public DateTime JwtExpires { get; set; }
+
             public string RefreshToken { get; set; }
+
+            public DateTime RefreshExpires { get; set; }
         }
     }
 }

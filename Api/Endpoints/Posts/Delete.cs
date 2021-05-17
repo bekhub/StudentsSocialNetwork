@@ -37,7 +37,7 @@ namespace Api.Endpoints.Posts
         {
             var post = await _service.ByIdAsync(request.Id, cancellationToken);
 
-            if (post == null) return BadRequest(Result.From(DefaultResource.PostNotFound));
+            if (post == null) return BadRequest(Result.From(Resource.PostNotFound));
 
             if (post.Pictures.Any())
                 _service.DeletePictures(post.Pictures.Select(x => x.Url));
@@ -45,7 +45,7 @@ namespace Api.Endpoints.Posts
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Ok(Result.From(DefaultResource.PostDeleted));
+            return Ok(Result.From(Resource.PostDeleted));
         }
     }
 }

@@ -61,6 +61,7 @@ namespace Api.Endpoints.Posts
                 .OrderByDescending(x => x.CreatedAt)
                 .Skip(request.Offset ?? 0)
                 .Take(request.Limit ?? 30)
+                // Ошибка при использовании ProjectTo: удваивает значение LikesCount
                 .Select(x => _mapper.Map<Response.List>(x))
                 .ToListAsync(cancellationToken);
 

@@ -43,7 +43,7 @@ namespace Api.Endpoints.Posts
         {
             var post = await _service.ByIdAsync(request.Id, cancellationToken);
 
-            if (post == null) return BadRequest(Result.From(DefaultResource.PostNotFound));
+            if (post == null) return BadRequest(Result.From(Resource.PostNotFound));
 
             post.Body = request.Body;
             post.UpdatedAt = DateTime.UtcNow;

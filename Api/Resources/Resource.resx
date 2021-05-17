@@ -72,4 +72,28 @@
     <data name="PostDeleted" xml:space="preserve">
         <value>Post succussfully deleted</value>
     </data>
+    <data name="CommentTargetError" xml:space="preserve">
+        <value>The comment must be either to the post or to another comment</value>
+    </data>
+    <data name="TargetNotFound" xml:space="preserve">
+        <value>Target not found</value>
+    </data>
+    <data name="BodyRequired" xml:space="preserve">
+        <value>Body required</value>
+    </data>
+    <data name="CommentNotFound" xml:space="preserve">
+        <value>Comment not found</value>
+    </data>
+    <data name="CommentUserError" xml:space="preserve">
+        <value>The comment does not belong to the user</value>
+    </data>
+    <data name="CommentDeleted" xml:space="preserve">
+        <value>The comment deleted</value>
+    </data>
+    <data name="CommentLikeSuccess" xml:space="preserve">
+        <value>Comment like/unlike success</value>
+    </data>
+    <data name="NestingError" xml:space="preserve">
+        <value>Multiple nesting is not allowed</value>
+    </data>
 </root>

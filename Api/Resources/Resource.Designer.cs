@@ -22,14 +22,14 @@ namespace Api.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class DefaultResource {
+    internal class Resource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal DefaultResource() {
+        internal Resource() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Api.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Api.Resources.DefaultResource", typeof(DefaultResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Api.Resources.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,60 @@ namespace Api.Resources {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Body required.
+        /// </summary>
+        internal static string BodyRequired {
+            get {
+                return ResourceManager.GetString("BodyRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The comment deleted.
+        /// </summary>
+        internal static string CommentDeleted {
+            get {
+                return ResourceManager.GetString("CommentDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Comment like/unlike success.
+        /// </summary>
+        internal static string CommentLikeSuccess {
+            get {
+                return ResourceManager.GetString("CommentLikeSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Comment not found.
+        /// </summary>
+        internal static string CommentNotFound {
+            get {
+                return ResourceManager.GetString("CommentNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The comment must be either to the post or to another comment.
+        /// </summary>
+        internal static string CommentTargetError {
+            get {
+                return ResourceManager.GetString("CommentTargetError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The comment does not belong to the user.
+        /// </summary>
+        internal static string CommentUserError {
+            get {
+                return ResourceManager.GetString("CommentUserError", resourceCulture);
             }
         }
         
@@ -84,6 +138,15 @@ namespace Api.Resources {
         internal static string InvalidPassword {
             get {
                 return ResourceManager.GetString("InvalidPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Multiple nesting is not allowed.
+        /// </summary>
+        internal static string NestingError {
+            get {
+                return ResourceManager.GetString("NestingError", resourceCulture);
             }
         }
         
@@ -192,6 +255,15 @@ namespace Api.Resources {
         internal static string RegisterSuccess {
             get {
                 return ResourceManager.GetString("RegisterSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target not found.
+        /// </summary>
+        internal static string TargetNotFound {
+            get {
+                return ResourceManager.GetString("TargetNotFound", resourceCulture);
             }
         }
         

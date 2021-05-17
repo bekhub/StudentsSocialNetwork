@@ -56,7 +56,7 @@ namespace Api.Endpoints.Registration
             stopWatch.Start();
             _logger.LogWarning("Registration start");
             if (await CheckIsUserRegistered(request))
-                return BadRequest(Result.From(DefaultResource.UserExists));
+                return BadRequest(Result.From(Resource.UserExists));
 
             var user = _mapper.Map<ApplicationUser>(request);
             user.SignUpDate = DateTime.UtcNow;
@@ -64,14 +64,14 @@ namespace Api.Endpoints.Registration
             user.ProfilePictureUrl = await _fileSystem.SavePictureAsync(file.FileName, file.ToArray(), FOLDER);
             
             var student = await _registrationService.GetUnregisteredStudentAsync(request.StudentNumber, request.StudentPassword);
-            if (student == null) return BadRequest(Result.From(DefaultResource.RegisterError));
+            if (student == null) return BadRequest(Result.From(Resource.RegisterError));
 
             user.Firstname = student.Firstname;
             user.Lastname = student.Lastname;
 
             user.Students.Add(student);
             var result = await _userManager.CreateAsync(user, request.Password);
-            if (!result.Succeeded) return BadRequest(Result.From(DefaultResource.RegisterError));
+            if (!result.Succeeded) return BadRequest(Result.From(Resource.RegisterError));
             
             await _userManager.AddToRolesAsync(user, new[] {RoleConstants.USER, RoleConstants.STUDENT});
             
@@ -86,7 +86,7 @@ namespace Api.Endpoints.Registration
             stopWatch.Stop();
             _logger.LogWarning("Registration end. {Milliseconds} ms elapsed", stopWatch.Elapsed.Milliseconds);
 
-            return Ok(Result.From(DefaultResource.RegisterSuccess));
+            return Ok(Result.From(Resource.RegisterSuccess));
         }
 
         private async Task<bool> CheckIsUserRegistered(Request.Register request)

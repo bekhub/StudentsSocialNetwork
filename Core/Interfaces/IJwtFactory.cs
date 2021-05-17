@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Core.Entities;
@@ -10,7 +11,7 @@ namespace Core.Interfaces
         /// <summary>
         /// Creates the jwt token.
         /// </summary>
-        Task<string> CreateTokenAsync(string userId, string email, IEnumerable<Claim> additionalClaims = default);
+        Task<(string token, DateTime expiration)> CreateTokenAsync(string userId, string email, IEnumerable<Claim> additionalClaims = default);
         
         /// <summary>
         /// Creates the refresh token.

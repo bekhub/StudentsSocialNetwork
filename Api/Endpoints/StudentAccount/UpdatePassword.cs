@@ -42,13 +42,13 @@ namespace Api.Endpoints.StudentAccount
             var userId = _currentUserAccessor.GetCurrentUserId();
             var student = await _service.GetCurrentStudentAsync(userId);
             if (!await _service.CheckStudentPasswordAsync(student.StudentNumber, request.Password))
-                return BadRequest(Result.From(DefaultResource.InvalidPassword));
+                return BadRequest(Result.From(Resource.InvalidPassword));
             
             var password = await _encryptionService.EncryptAsync(request.Password);
             student.StudentPassword = password;
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Ok(Result.From(DefaultResource.PasswordUpdated));
+            return Ok(Result.From(Resource.PasswordUpdated));
         }
     }
 }

@@ -63,7 +63,7 @@ namespace Api.Endpoints.Auth
 
             if (!result.Succeeded) return Unauthorized();
 
-            var jwtToken = await _jwtFactory.CreateTokenAsync(user.Id, user.Email);
+            var (jwtToken, jwtExpires) = await _jwtFactory.CreateTokenAsync(user.Id, user.Email);
             var refreshToken = _jwtFactory.CreateRefreshToken(_userAccessor.GetIpAddress());
             user.RefreshTokens.Add(refreshToken);
             
@@ -76,7 +76,9 @@ namespace Api.Endpoints.Auth
                 Username = user.UserName,
                 UserId = user.Id,
                 JwtToken = jwtToken,
+                JwtExpires = jwtExpires,
                 RefreshToken = refreshToken.Token,
+                RefreshExpires = refreshToken.Expires,
             };
         }
     }

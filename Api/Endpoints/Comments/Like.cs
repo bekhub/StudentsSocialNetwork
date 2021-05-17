@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Api.Endpoints.Posts
+namespace Api.Endpoints.Comments
 {
     public class Like : BaseAsyncEndpoint
         .WithRequest<Request.Like>
@@ -29,30 +29,30 @@ namespace Api.Endpoints.Posts
         }
 
         [JwtAuthorize(RoleConstants.USER)]
-        [HttpPatch("api/posts/like")]
+        [HttpPatch("api/comments/like")]
         [SwaggerOperation(
-            Summary = "Like post",
-            Description = "Like post",
-            OperationId = "posts.like",
-            Tags = new[] {"Posts"})]
-        public override async Task<ActionResult<Result>> HandleAsync(Request.Like request,
-            CancellationToken cancellationToken = new())
+            Summary = "Like comment",
+            Description = "Like comment",
+            OperationId = "comments.like",
+            Tags = new[] {"Comments"})]
+        public override async Task<ActionResult<Result>> HandleAsync(Request.Like request, 
+            CancellationToken cancellationToken = new ())
         {
             var userId = _currentUserAccessor.GetCurrentUserId();
-            var post = await _context.Posts
-                .Include(x => x.PostLikes)
+            var comment = await _context.Comments
+                .Include(x => x.CommentLikes)
                 .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-            if (post == null) return BadRequest(Result.From(Resource.PostNotFound));
+            if (comment == null) return BadRequest(Result.From(Resource.PostNotFound));
 
-            var postLike = post.PostLikes.SingleOrDefault(x => x.UserId == userId);
+            var commentLike = comment.CommentLikes.SingleOrDefault(x => x.UserId == userId);
 
-            if (postLike == null) post.PostLikes.Add(new PostLike {Post = post, UserId = userId});
-            else post.PostLikes.Remove(postLike);
+            if (commentLike == null) comment.CommentLikes.Add(new CommentLike {Comment = comment, UserId = userId});
+            else comment.CommentLikes.Remove(commentLike);
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Result.From(Resource.PostLikeSuccess);
+            return Result.From(Resource.CommentLikeSuccess);
         }
     }
 }

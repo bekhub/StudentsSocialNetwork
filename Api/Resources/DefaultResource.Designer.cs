@@ -115,6 +115,69 @@ namespace Api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New post created.
+        /// </summary>
+        internal static string PostCreated {
+            get {
+                return ResourceManager.GetString("PostCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Post succussfully deleted.
+        /// </summary>
+        internal static string PostDeleted {
+            get {
+                return ResourceManager.GetString("PostDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Post wasn&apos;t saved.
+        /// </summary>
+        internal static string PostError {
+            get {
+                return ResourceManager.GetString("PostError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Post like/unlike success.
+        /// </summary>
+        internal static string PostLikeSuccess {
+            get {
+                return ResourceManager.GetString("PostLikeSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New post couldn&apos;t created.
+        /// </summary>
+        internal static string PostNotCreated {
+            get {
+                return ResourceManager.GetString("PostNotCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Post not found.
+        /// </summary>
+        internal static string PostNotFound {
+            get {
+                return ResourceManager.GetString("PostNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Post successfully updated.
+        /// </summary>
+        internal static string PostUpdated {
+            get {
+                return ResourceManager.GetString("PostUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error during registering user.
         /// </summary>
         internal static string RegisterError {
@@ -129,6 +192,15 @@ namespace Api.Resources {
         internal static string RegisterSuccess {
             get {
                 return ResourceManager.GetString("RegisterSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Authorization required.
+        /// </summary>
+        internal static string UnAuthorized {
+            get {
+                return ResourceManager.GetString("UnAuthorized", resourceCulture);
             }
         }
         

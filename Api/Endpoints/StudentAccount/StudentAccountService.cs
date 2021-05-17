@@ -14,15 +14,13 @@ namespace Api.Endpoints.StudentAccount
     {
         private readonly SsnDbContext _context;
         private readonly StudentsService _studentsService;
-        private readonly IEncryptionService _encryptionService;
         private readonly IObisApiService _obisApiService;
 
         public StudentAccountService(SsnDbContext context,
-            StudentsService studentsService, IEncryptionService encryptionService, IObisApiService obisApiService)
+            StudentsService studentsService, IObisApiService obisApiService)
         {
             _context = context;
             _studentsService = studentsService;
-            _encryptionService = encryptionService;
             _obisApiService = obisApiService;
         }
         

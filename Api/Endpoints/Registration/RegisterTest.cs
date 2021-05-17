@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Api.Helpers;
 using Api.Helpers.Extensions;
+using Api.Resources;
 using Api.Services;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
@@ -54,7 +55,7 @@ namespace Api.Endpoints.Registration
             stopWatch.Start();
             _logger.LogWarning("Registration start");
             if (await CheckIsUserRegistered(request))
-                return BadRequest(Result.UserExists);
+                return BadRequest(Result.From(DefaultResource.UserExists));
 
             var user = _mapper.Map<ApplicationUser>(request);
             user.SignUpDate = DateTime.UtcNow;
@@ -62,7 +63,7 @@ namespace Api.Endpoints.Registration
             user.ProfilePictureUrl = await _fileSystem.SavePictureAsync(file.FileName, file.ToArray(), FOLDER);
             
             var student = await _registrationService.GetUnregisteredStudentAsync(request.StudentNumber, request.StudentPassword);
-            if (student == null) return BadRequest(Result.RegisterError);
+            if (student == null) return BadRequest(Result.From(DefaultResource.RegisterError));
 
             user.Firstname = student.Firstname;
             user.Lastname = student.Lastname;
@@ -77,7 +78,7 @@ namespace Api.Endpoints.Registration
             stopWatch.Stop();
             _logger.LogWarning("Registration end. {Milliseconds} ms elapsed", stopWatch.Elapsed.Milliseconds);
 
-            return Ok(Result.RegisterSuccess);
+            return Ok(Result.From(DefaultResource.RegisterSuccess));
         }
 
         private async Task<bool> CheckIsUserRegistered(Request.Register request)

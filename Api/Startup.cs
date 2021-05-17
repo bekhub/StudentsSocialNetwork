@@ -19,15 +19,12 @@ namespace Api
     {
         private const string CORS_POLICY = "CorsPolicy";
         
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _environment = environment;
         }
 
         public IConfiguration Configuration { get; }
-
-        private readonly IWebHostEnvironment _environment;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)

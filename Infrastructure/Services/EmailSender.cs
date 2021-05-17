@@ -34,8 +34,7 @@ namespace Infrastructure.Services
             await emailClient.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, SecureSocketOptions.StartTls);
             await emailClient.AuthenticateAsync(_emailSettings.SmtpUser, _emailSettings.SmtpPass);
             await emailClient.SendAsync(email);
-            var logMessage = $"Sending email to {to} from {from} with subject {subject}.";
-            _logger.LogWarning(logMessage);
+            _logger.LogWarning("Sending email to {To} from {From} with subject {Subject}", to, from, subject);
             await emailClient.DisconnectAsync(true);
         }
     }

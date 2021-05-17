@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Api.Configuration;
 using CloudinaryDotNet;
@@ -23,6 +25,22 @@ namespace Api.Services
             _cloudinary = new Cloudinary(account);
         }
 
+        public string SavePicture(string pictureName, byte[] picture, string folder = "")
+        {
+            if (!picture.IsValidImage(pictureName)) return null;
+            pictureName = pictureName.GeneratePictureName();
+            
+            using var stream = new MemoryStream(picture);
+            var uploadParams = new ImageUploadParams
+            {
+                Folder = folder,
+                PublicId = Path.GetFileNameWithoutExtension(pictureName),
+                File = new FileDescription(pictureName, stream),
+            };
+            var uploadResult = _cloudinary.Upload(uploadParams);
+            return uploadResult.Url.ToString();
+        }
+
         public async Task<string> SavePictureAsync(string pictureName, byte[] picture, string folder = "")
         {
             if (!picture.IsValidImage(pictureName)) return null;
@@ -42,7 +60,26 @@ namespace Api.Services
         public void DeletePicture(string pictureUrl, string folder = "")
         {
             var pictureName = Path.GetFileNameWithoutExtension(pictureUrl);
-            _cloudinary.DeleteResources(pictureName);
+            _cloudinary.Destroy(new DeletionParams(pictureName));
+        }
+
+        public Task DeletePictureAsync(string pictureUrl, string folder = "")
+        {
+            var pictureName = Path.GetFileNameWithoutExtension(pictureUrl);
+            return _cloudinary.DestroyAsync(new DeletionParams(pictureName));
+        }
+
+        public void DeletePictures(IEnumerable<string> pictureUrls, string folder = "")
+        {
+            var pictureNames = pictureUrls.Select(Path.GetFileNameWithoutExtension).ToList();
+            pictureNames.AsParallel().Select(x => _cloudinary.Destroy(new DeletionParams(x)));
+        }
+
+        public Task DeletePicturesAsync(IEnumerable<string> pictureUrls, string folder = "")
+        {
+            var pictureNames = pictureUrls.Select(Path.GetFileNameWithoutExtension).ToArray();
+            pictureNames.AsParallel().Select(x => _cloudinary.Destroy(new DeletionParams(x)));
+            return Task.CompletedTask;
         }
     }
 }

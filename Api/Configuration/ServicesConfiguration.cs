@@ -16,8 +16,8 @@ namespace Api.Configuration
             services.AddScoped<StudentsService>();
             services.AddScoped<RegistrationService>();
             services.AddScoped<StudentAccountService>();
+            services.AddScoped<PostsService>();
             services.AddScoped<IFileSystem, CloudinaryFileSystem>();
-            services.AddScoped<PostService>();
             services.AddTransient<IFireAndForgetHandler, FireAndForgetHandler>();
         }
     }

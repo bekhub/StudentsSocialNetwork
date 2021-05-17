@@ -38,8 +38,8 @@ namespace Api.Endpoints.UserAccount
             var user = await _currentUserAccessor.GetCurrentUserAsync(cancellationToken);
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
             if (!result.Succeeded)
-                return BadRequest(Result.From(DefaultResource.PasswordError));
-            return Ok(Result.From(DefaultResource.PasswordChanged));
+                return BadRequest(Result.From(Resource.PasswordError));
+            return Ok(Result.From(Resource.PasswordChanged));
         }
     }
 }

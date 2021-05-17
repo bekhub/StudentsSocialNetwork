@@ -26,7 +26,7 @@ namespace Infrastructure.Identity
             ThrowIfInvalidOptions(_jwtOptions);
         }
 
-        public async Task<string> CreateTokenAsync(string userId, string email, IEnumerable<Claim> additionalClaims = default)
+        public async Task<(string, DateTime)> CreateTokenAsync(string userId, string email, IEnumerable<Claim> additionalClaims = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
             var roles = await _userManager.GetRolesAsync(user);
@@ -42,17 +42,19 @@ namespace Infrastructure.Identity
             claims.AddRange(additionalClaims ?? Array.Empty<Claim>());
             claims.AddRange(roles.Select(x => new Claim(ClaimTypes.Role, x)));
 
+            var expires = _jwtOptions.Expiration;
+
             var jwt = new JwtSecurityToken(
                 issuer: _jwtOptions.Issuer,
                 audience: _jwtOptions.Audience,
                 claims: claims,
                 notBefore: _jwtOptions.NotBefore,
-                expires: _jwtOptions.Expiration,
+                expires: expires,
                 signingCredentials: _jwtOptions.SigningCredentials);
 
             var tokenHandler = new JwtSecurityTokenHandler();
             
-            return tokenHandler.WriteToken(jwt);
+            return (tokenHandler.WriteToken(jwt), expires);
         }
 
         public RefreshToken CreateRefreshToken(string ipAddress)

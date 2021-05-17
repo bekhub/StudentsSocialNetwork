@@ -34,7 +34,7 @@ namespace Api.Endpoints.Posts
             Description = "Post details",
             OperationId = "posts.details",
             Tags = new[] {"Posts"})]
-        public override async Task<ActionResult<Response.Details>> HandleAsync(int id, CancellationToken cancellationToken = new CancellationToken())
+        public override async Task<ActionResult<Response.Details>> HandleAsync(int id, CancellationToken cancellationToken = new())
         {
             var post = await _context.Posts
                 .Where(x => x.IsActive && x.Id == id)
@@ -46,7 +46,7 @@ namespace Api.Endpoints.Posts
                 .ProjectTo<Response.Details>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync(cancellationToken);
             
-            if (post == null) return BadRequest(Result.From(DefaultResource.PostNotFound));
+            if (post == null) return BadRequest(Result.From(Resource.PostNotFound));
 
             return post;
         }

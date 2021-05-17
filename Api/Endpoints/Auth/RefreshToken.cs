@@ -52,14 +52,16 @@ namespace Api.Endpoints.Auth
             user.RemoveOldRefreshTokens(_jwtConfiguration.RefreshTokenTtl);
 
             await _userRepository.UpdateAsync(user);
-            var jwtToken = await _jwtFactory.CreateTokenAsync(user.Id, user.Email);
+            var (jwtToken, jwtExpires) = await _jwtFactory.CreateTokenAsync(user.Id, user.Email);
 
             return new Response.Authenticate
             {
                 Username = user.UserName,
                 UserId = user.Id,
                 JwtToken = jwtToken,
-                RefreshToken = newRefreshToken.Token,
+                JwtExpires = jwtExpires,
+                RefreshToken = refreshToken.Token,
+                RefreshExpires = refreshToken.Expires,
             };
         }
     }

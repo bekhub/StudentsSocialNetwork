@@ -12,14 +12,14 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Posts
 {
-    public class DeletePost : BaseAsyncEndpoint
+    public class Delete : BaseAsyncEndpoint
         .WithRequest<Request.Delete>
         .WithResponse<Result>
     {
         private readonly SsnDbContext _context;
         private readonly PostsService _service;
 
-        public DeletePost(SsnDbContext context, PostsService service)
+        public Delete(SsnDbContext context, PostsService service)
         {
             _context = context;
             _service = service;

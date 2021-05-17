@@ -13,7 +13,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Posts
 {
-    public class CreatePost : BaseAsyncEndpoint
+    public class Create : BaseAsyncEndpoint
         .WithRequest<Request.Create>
         .WithResponse<Response.Create>
     {
@@ -22,7 +22,7 @@ namespace Api.Endpoints.Posts
         private readonly IMapper _mapper;
         private readonly PostsService _service;
 
-        public CreatePost(SsnDbContext context, IMapper mapper, 
+        public Create(SsnDbContext context, IMapper mapper, 
             ICurrentUserAccessor currentUserAccessor, PostsService service)
         {
             _context = context;

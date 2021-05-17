@@ -14,7 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Posts
 {
-    public class ListPost: BaseAsyncEndpoint
+    public class List: BaseAsyncEndpoint
         .WithRequest<Request.List>
         .WithResponse<List<Response.List>>
     {
@@ -23,7 +23,7 @@ namespace Api.Endpoints.Posts
         private readonly PostsService _service;
         private readonly IMapper _mapper;
 
-        public ListPost(SsnDbContext context, IMapper mapper, PostsService service, UserManager<ApplicationUser> userManager)
+        public List(SsnDbContext context, IMapper mapper, PostsService service, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _mapper = mapper;

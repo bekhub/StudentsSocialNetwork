@@ -16,7 +16,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Posts
 {
-    public class UpdatePost : BaseAsyncEndpoint
+    public class Update : BaseAsyncEndpoint
         .WithRequest<Request.Update>
         .WithResponse<Response.Update>
     {
@@ -24,7 +24,7 @@ namespace Api.Endpoints.Posts
         private readonly PostsService _service;
         private readonly IMapper _mapper;
 
-        public UpdatePost(SsnDbContext context, PostsService service, IMapper mapper)
+        public Update(SsnDbContext context, PostsService service, IMapper mapper)
         {
             _context = context;
             _service = service;

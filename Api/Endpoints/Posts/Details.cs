@@ -14,14 +14,14 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Posts
 {
-    public class DetailedPost : BaseAsyncEndpoint
+    public class Details : BaseAsyncEndpoint
         .WithRequest<int>
         .WithResponse<Response.Details>
     {
         private readonly SsnDbContext _context;
         private readonly IMapper _mapper;
 
-        public DetailedPost(SsnDbContext context, IMapper mapper)
+        public Details(SsnDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

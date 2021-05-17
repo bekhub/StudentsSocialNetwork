@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Api.Helpers.Extensions;
 using Api.Services;
+using Common.Extensions;
 using Core.Entities;
 using Core.Interfaces;
 using Core.Interfaces.Services;
 using Core.ObisApiModels;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Endpoints.Registration
@@ -14,21 +17,23 @@ namespace Api.Endpoints.Registration
     {
         private readonly SsnDbContext _context;
         private readonly IFireAndForgetHandler _fireAndForgetHandler;
-        private readonly IRestApiService _restApiService;
+        private readonly IObisApiService _obisApiService;
         private readonly IEncryptionService _encryptionService;
+        private readonly IFileSystem _fileSystem;
 
-        public RegistrationService(SsnDbContext context, IRestApiService restApiService,
-            IEncryptionService encryptionService, IFireAndForgetHandler fireAndForgetHandler)
+        public RegistrationService(SsnDbContext context, IObisApiService obisApiService,
+            IEncryptionService encryptionService, IFireAndForgetHandler fireAndForgetHandler, IFileSystem fileSystem)
         {
             _context = context;
-            _restApiService = restApiService;
+            _obisApiService = obisApiService;
             _encryptionService = encryptionService;
             _fireAndForgetHandler = fireAndForgetHandler;
+            _fileSystem = fileSystem;
         }
 
         public async Task<bool> CheckStudentAsync(string studentNumber, string studentPassword)
         {
-            var response = await _restApiService.AuthenticateAsync(new Authenticate.Request
+            var response = await _obisApiService.AuthenticateAsync(new Authenticate.Request
             {
                 Number = studentNumber,
                 Password = studentPassword,
@@ -56,12 +61,12 @@ namespace Api.Endpoints.Registration
 
         private async Task<Student> BuildStudentAsync(string studentNumber, string studentPassword)
         {
-            var authenticate = await _restApiService.AuthenticateAsync(studentNumber, studentPassword);
+            var authenticate = await _obisApiService.AuthenticateAsync(studentNumber, studentPassword);
             if (authenticate == null || string.IsNullOrEmpty(authenticate.AuthKey))
                 return null;
 
-            var mainInfo = await _restApiService.MainInfoAsync();
-            var studentInfo = await _restApiService.StudentInfoAsync();
+            var mainInfo = await _obisApiService.MainInfoAsync();
+            var studentInfo = await _obisApiService.StudentInfoAsync();
 
             var encryptedPassword = await _encryptionService.EncryptAsync(studentPassword);
             var admissionYear = Convert.ToInt32($"20{studentNumber[..2]}");
@@ -97,6 +102,18 @@ namespace Api.Endpoints.Registration
                 Name = departmentName,
                 Institute = await GetInstituteAsync(instituteName),
             };
+        }
+        
+        public async Task<string> MakePictureUrlAsync(IFormFile file, string folder)
+        {
+            if (file is not {Length: > 0}) return string.Empty;
+
+            var picName = file.FileName.GeneratePictureName();
+            var picture = file.ToArray();
+
+            var pictureUrl = await _fileSystem.SavePictureAsync(picName, picture, folder);
+
+            return pictureUrl ?? string.Empty;
         }
 
         private static string GetStudentEmail(string studentNumber)

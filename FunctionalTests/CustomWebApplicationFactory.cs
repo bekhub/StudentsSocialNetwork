@@ -44,9 +44,7 @@ namespace FunctionalTests
                 }
                 catch (Exception ex)
                 {
-                    var logError = "An error occurred seeding the " +
-                                   $"database with test messages. Error: {ex.Message}";
-                    logger.LogError(ex, logError);
+                    logger.LogError(ex, "An error occurred seeding the database with test messages. Error: {Message}", ex.Message);
                 }
             }
 

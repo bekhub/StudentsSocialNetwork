@@ -1,16 +1,33 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Extensions;
 using Core.Interfaces;
 
 namespace Api.Services
 {
     public class WebFileSystem : IFileSystem
     {
-        public async Task<bool> SavePictureAsync(string pictureName, byte[] picture, string folder = "")
+        public string SavePicture(string pictureName, byte[] picture, string folder = "")
         {
-            if (!picture.IsValidImage(pictureName)) return false;
+            if (!picture.IsValidImage(pictureName)) return null;
+            pictureName = pictureName.GeneratePictureName();
+            
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/images", folder);
+            var fullPath = Path.Combine(folderPath, pictureName);
+            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+            if (File.Exists(fullPath)) File.Delete(fullPath);
+
+            File.WriteAllBytes(fullPath, picture);
+            
+            return Path.Combine($@"/static/images/{folder}", pictureName);
+        }
+
+        public async Task<string> SavePictureAsync(string pictureName, byte[] picture, string folder = "")
+        {
+            if (!picture.IsValidImage(pictureName)) return null;
+            pictureName = pictureName.GeneratePictureName();
             
             var folderPath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/images", folder);
             var fullPath = Path.Combine(folderPath, pictureName);
@@ -19,54 +36,44 @@ namespace Api.Services
 
             await File.WriteAllBytesAsync(fullPath, picture);
             
-            return true;
+            return Path.Combine($@"/static/images/{folder}", pictureName);
         }
 
-        public void DeletePicture(string pictureName, string folder = "")
+        public void DeletePicture(string pictureUrl, string folder = "")
         {
-            if (string.IsNullOrEmpty(pictureName)) return;
+            if (string.IsNullOrEmpty(pictureUrl)) return;
+            
+            var pictureName = Path.GetFileName(pictureUrl);
             
             var fullPath = Path.Combine(Directory.GetCurrentDirectory(), $@"wwwroot/images/{folder}", pictureName);
             if (File.Exists(fullPath)) File.Delete(fullPath);
         }
-        
-        public string MakePictureUrl(string pictureName, string folder = "")
+
+        public Task DeletePictureAsync(string pictureUrl, string folder = "")
         {
-            return Path.Combine($@"/static/images/{folder}", pictureName);
+            return Task.Run(() => DeletePicture(pictureUrl, folder));
         }
 
-        public string GeneratePictureName(string pictureName)
+        public void DeletePictures(IEnumerable<string> pictureUrls, string folder = "")
         {
-            return $"{DateTime.UtcNow.Ticks}{Path.GetExtension(pictureName)}";
-        }
-
-        public string GetPictureName(string pictureUrl)
-        {
-            if (string.IsNullOrEmpty(pictureUrl)) return string.Empty;
+            pictureUrls = pictureUrls.ToList();
+            if (!pictureUrls.Any()) return;
             
-            var picName = pictureUrl.Split('/').Last();
-            return picName;
-        }
-    }
-    
-    public static class ImageValidators
-    {
-        private const int IMAGE_MAXIMUM_BYTES = 4_194_304;
-
-        public static bool IsValidImage(this byte[] postedFile, string fileName)
-        {
-            return postedFile != null && postedFile.Length > 0 && postedFile.Length <= IMAGE_MAXIMUM_BYTES && IsExtensionValid(fileName);
+            var pictureNames = pictureUrls.Where(x => !string.IsNullOrEmpty(x)).Select(Path.GetFileName).ToList();
+            
+            var fullPaths = pictureNames
+                .Select(x => Path.Combine(Directory.GetCurrentDirectory(), $@"wwwroot/images/{folder}", x))
+                .ToList();
+            fullPaths.ForEach(x =>
+            {
+                if (File.Exists(x))
+                    File.Delete(x);
+            });
         }
 
-        private static bool IsExtensionValid(string fileName)
+        public Task DeletePicturesAsync(IEnumerable<string> pictureUrls, string folder = "")
         {
-            var extension = Path.GetExtension(fileName);
-
-            return string.Equals(extension, ".jpg", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(extension, ".png", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(extension, ".svg", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(extension, ".gif", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(extension, ".jpeg", StringComparison.OrdinalIgnoreCase);
+            return Task.Run(() => DeletePictures(pictureUrls, folder));
         }
     }
 }

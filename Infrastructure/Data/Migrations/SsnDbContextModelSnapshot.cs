@@ -145,6 +145,9 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int?>("PostId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("TargetId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -155,6 +158,8 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PostId");
+
+                    b.HasIndex("TargetId");
 
                     b.HasIndex("UserId");
 
@@ -174,22 +179,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("CommentId");
 
                     b.ToTable("CommentLikes");
-                });
-
-            modelBuilder.Entity("Core.Entities.CommentReply", b =>
-                {
-                    b.Property<int>("TargetId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ReplyId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("TargetId", "ReplyId");
-
-                    b.HasIndex("ReplyId")
-                        .IsUnique();
-
-                    b.ToTable("CommentReplies");
                 });
 
             modelBuilder.Entity("Core.Entities.Course", b =>
@@ -338,22 +327,6 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("Core.Entities.PostComment", b =>
-                {
-                    b.Property<int>("PostId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CommentId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("PostId", "CommentId");
-
-                    b.HasIndex("CommentId")
-                        .IsUnique();
-
-                    b.ToTable("PostComments");
-                });
-
             modelBuilder.Entity("Core.Entities.PostLike", b =>
                 {
                     b.Property<string>("UserId")
@@ -388,21 +361,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("PostPictures");
-                });
-
-            modelBuilder.Entity("Core.Entities.PostTag", b =>
-                {
-                    b.Property<int>("PostId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("PostId", "TagId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("PostTags");
                 });
 
             modelBuilder.Entity("Core.Entities.Student", b =>
@@ -513,12 +471,7 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("PostId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("PostId");
 
                     b.ToTable("Tags");
                 });
@@ -653,6 +606,21 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("UserTokens");
                 });
 
+            modelBuilder.Entity("PostTags", b =>
+                {
+                    b.Property<int>("PostId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PostId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("PostTags");
+                });
+
             modelBuilder.Entity("Core.Entities.ApplicationUser", b =>
                 {
                     b.OwnsMany("Core.Entities.RefreshToken", "RefreshTokens", b1 =>
@@ -715,15 +683,25 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Entities.Comment", b =>
                 {
-                    b.HasOne("Core.Entities.Post", null)
+                    b.HasOne("Core.Entities.Post", "Post")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Core.Entities.Comment", "Target")
+                        .WithMany("Replies")
+                        .HasForeignKey("TargetId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Core.Entities.ApplicationUser", "User")
                         .WithMany("Comments")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("Target");
 
                     b.Navigation("User");
                 });
@@ -745,25 +723,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Comment");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Core.Entities.CommentReply", b =>
-                {
-                    b.HasOne("Core.Entities.Comment", "Reply")
-                        .WithMany()
-                        .HasForeignKey("ReplyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.Comment", "Target")
-                        .WithMany("CommentReplies")
-                        .HasForeignKey("TargetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Reply");
-
-                    b.Navigation("Target");
                 });
 
             modelBuilder.Entity("Core.Entities.Course", b =>
@@ -808,25 +767,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Core.Entities.PostComment", b =>
-                {
-                    b.HasOne("Core.Entities.Comment", "Comment")
-                        .WithMany()
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.Post", "Post")
-                        .WithMany("PostComments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Comment");
-
-                    b.Navigation("Post");
-                });
-
             modelBuilder.Entity("Core.Entities.PostLike", b =>
                 {
                     b.HasOne("Core.Entities.Post", "Post")
@@ -855,25 +795,6 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("Core.Entities.PostTag", b =>
-                {
-                    b.HasOne("Core.Entities.Post", "Post")
-                        .WithMany("PostTags")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.Tag", "Tag")
-                        .WithMany("PostTags")
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("Core.Entities.Student", b =>
@@ -910,13 +831,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("Core.Entities.Tag", b =>
-                {
-                    b.HasOne("Core.Entities.Post", null)
-                        .WithMany("Tags")
-                        .HasForeignKey("PostId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -970,6 +884,21 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PostTags", b =>
+                {
+                    b.HasOne("Core.Entities.Post", null)
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Core.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("CommentLikes");
@@ -987,7 +916,7 @@ namespace Infrastructure.Data.Migrations
                 {
                     b.Navigation("CommentLikes");
 
-                    b.Navigation("CommentReplies");
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Core.Entities.Course", b =>
@@ -1015,13 +944,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.Navigation("Pictures");
 
-                    b.Navigation("PostComments");
-
                     b.Navigation("PostLikes");
-
-                    b.Navigation("PostTags");
-
-                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("Core.Entities.Student", b =>
@@ -1032,11 +955,6 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Core.Entities.StudentCourse", b =>
                 {
                     b.Navigation("Assessments");
-                });
-
-            modelBuilder.Entity("Core.Entities.Tag", b =>
-                {
-                    b.Navigation("PostTags");
                 });
 #pragma warning restore 612, 618
         }

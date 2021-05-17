@@ -13,6 +13,7 @@ namespace Api.Endpoints.Registration
             public string StudentNumber { get; set; }
             
             [Required]
+            [DataType(DataType.Password)]
             public string StudentPassword { get; set; }
 
             [Required]

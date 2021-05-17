@@ -4,7 +4,7 @@ namespace Common.Extensions
 {
     public static class JsonExtensions
     {
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions JsonOptions = new()
         {
             PropertyNameCaseInsensitive = true,
         };
@@ -13,6 +13,6 @@ namespace Common.Extensions
             JsonSerializer.Deserialize<T>(json, JsonOptions);
 
         public static string ToJson<T>(this T obj) =>
-            JsonSerializer.Serialize<T>(obj, JsonOptions);
+            JsonSerializer.Serialize(obj, JsonOptions);
     }
 }

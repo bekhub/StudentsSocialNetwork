@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
-
-namespace Api.Endpoints.Auth
+﻿namespace Api.Endpoints.Auth
 {
     public class Request
     {

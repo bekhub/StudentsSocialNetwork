@@ -1,28 +1,23 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 
-namespace ObisRestClient
+namespace RestServices
 {
-    public class HttpService
+    public class BaseHttpService
     {
-        private readonly HttpClient _httpClient;
+        protected readonly HttpClient HttpClient;
 
-        public HttpService(HttpClient httpClient, IOptions<ObisApiSettings> apiSettingsOptions)
+        public BaseHttpService(HttpClient httpClient)
         {
-            _httpClient = httpClient;
-            var apiSettings = apiSettingsOptions.Value;
-            _httpClient.BaseAddress = new Uri(apiSettings.BaseUrl);
-            _httpClient.DefaultRequestHeaders.Add("appKey", apiSettings.AppKey);
+            HttpClient = httpClient;
         }
 
-        public async Task<T> GetAsync<T>(string uri)
+        protected async Task<T> GetAsync<T>(string uri)
             where T : class
         {
-            var result = await _httpClient.GetAsync(uri);
+            var result = await HttpClient.GetAsync(uri);
             if (!result.IsSuccessStatusCode)
             {
                 return null;
@@ -31,10 +26,10 @@ namespace ObisRestClient
             return await FromHttpResponseMessage<T>(result);
         }
 
-        public async Task<T> DeleteAsync<T>(string uri, int id)
+        protected async Task<T> DeleteAsync<T>(string uri, int id)
             where T : class
         {
-            var result = await _httpClient.DeleteAsync($"{uri}/{id}");
+            var result = await HttpClient.DeleteAsync($"{uri}/{id}");
             if (!result.IsSuccessStatusCode)
             {
                 return null;
@@ -43,12 +38,12 @@ namespace ObisRestClient
             return await FromHttpResponseMessage<T>(result);
         }
 
-        public async Task<T> PostAsync<T>(string uri, object dataToSend)
+        protected async Task<T> PostAsync<T>(string uri, object dataToSend)
             where T : class
         {
             var content = ToJson(dataToSend);
 
-            var result = await _httpClient.PostAsync(uri, content);
+            var result = await HttpClient.PostAsync(uri, content);
             if (!result.IsSuccessStatusCode)
             {
                 return null;
@@ -57,23 +52,18 @@ namespace ObisRestClient
             return await FromHttpResponseMessage<T>(result);
         }
 
-        public async Task<T> PutAsync<T>(string uri, object dataToSend)
+        protected async Task<T> PutAsync<T>(string uri, object dataToSend)
             where T : class
         {
             var content = ToJson(dataToSend);
 
-            var result = await _httpClient.PutAsync(uri, content);
+            var result = await HttpClient.PutAsync(uri, content);
             if (!result.IsSuccessStatusCode)
             {
                 return null;
             }
 
             return await FromHttpResponseMessage<T>(result);
-        }
-
-        public void SetAuthKey(string authKey)
-        {
-            _httpClient.DefaultRequestHeaders.Add("Authorization", authKey);
         }
 
         private static StringContent ToJson(object obj)

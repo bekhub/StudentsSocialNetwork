@@ -2,8 +2,6 @@
 {
     public class Request
     {
-        public record PersonalInformation(string UserId);
-
-        public record LessonsAndMarks(string UserId);
+        public record UpdatePassword(string Password);
     }
 }

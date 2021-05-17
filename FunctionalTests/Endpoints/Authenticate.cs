@@ -12,8 +12,6 @@ namespace FunctionalTests.Endpoints
     [Collection("Sequential")]
     public class Authenticate :  IClassFixture<ApiTestFixture>
     {
-        private JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        
         public HttpClient Client { get; }
 
         public Authenticate(ApiTestFixture factory)

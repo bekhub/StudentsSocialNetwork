@@ -40,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Endpoints\Comments" />
     <Folder Include="wwwroot\images" />
     <Folder Include="wwwroot\images\profiles_pictures" />
   </ItemGroup>

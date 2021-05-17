@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Api.Configuration;
 using Api.Helpers;
+using Api.Resources;
 using Ardalis.ApiEndpoints;
 using Core.Entities;
 using Core.Interfaces.Services;
@@ -14,7 +15,7 @@ namespace Api.Endpoints.UserAccount
 {
     public class ChangePassword : BaseAsyncEndpoint
         .WithRequest<Request.ChangePassword>
-        .WithoutResponse
+        .WithResponse<Result>
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ICurrentUserAccessor _currentUserAccessor;
@@ -32,13 +33,13 @@ namespace Api.Endpoints.UserAccount
             Description = "Change user's password",
             OperationId = "userAccount.changePassword",
             Tags = new[] { "UserAccount" })]
-        public override async Task<ActionResult> HandleAsync(Request.ChangePassword request, CancellationToken cancellationToken = new())
+        public override async Task<ActionResult<Result>> HandleAsync(Request.ChangePassword request, CancellationToken cancellationToken = new())
         {
             var user = await _currentUserAccessor.GetCurrentUserAsync(cancellationToken);
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
             if (!result.Succeeded)
-                return BadRequest(Result.PasswordError);
-            return Ok(Result.PasswordChanged);
+                return BadRequest(Result.From(DefaultResource.PasswordError));
+            return Ok(Result.From(DefaultResource.PasswordChanged));
         }
     }
 }

@@ -48,4 +48,28 @@
     <data name="PasswordUpdated" xml:space="preserve">
         <value>Password has been updated</value>
     </data>
+    <data name="PostCreated" xml:space="preserve">
+        <value>New post created</value>
+    </data>
+    <data name="PostNotCreated" xml:space="preserve">
+        <value>New post couldn't created</value>
+    </data>
+    <data name="PostError" xml:space="preserve">
+        <value>Post wasn't saved</value>
+    </data>
+    <data name="UnAuthorized" xml:space="preserve">
+        <value>Authorization required</value>
+    </data>
+    <data name="PostNotFound" xml:space="preserve">
+        <value>Post not found</value>
+    </data>
+    <data name="PostUpdated" xml:space="preserve">
+        <value>Post successfully updated</value>
+    </data>
+    <data name="PostLikeSuccess" xml:space="preserve">
+        <value>Post like/unlike success</value>
+    </data>
+    <data name="PostDeleted" xml:space="preserve">
+        <value>Post succussfully deleted</value>
+    </data>
 </root>

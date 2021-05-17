@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Api.Helpers;
 using Api.Helpers.Extensions;
+using Api.Resources;
 using Api.Services;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
@@ -20,7 +21,7 @@ namespace Api.Endpoints.Registration
 {
     public class Register : BaseAsyncEndpoint
         .WithRequest<Request.Register>
-        .WithoutResponse
+        .WithResponse<Result>
     {
         private readonly EmailService _emailService;
         private readonly RegistrationService _registrationService;
@@ -48,14 +49,14 @@ namespace Api.Endpoints.Registration
             Description = "Registers a user",
             OperationId = "auth.signUp",
             Tags = new[] { "Auth.SignUp" })]
-        public override async Task<ActionResult> HandleAsync([FromForm] Request.Register request, 
+        public override async Task<ActionResult<Result>> HandleAsync([FromForm] Request.Register request, 
             CancellationToken cancellationToken = new())
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             _logger.LogWarning("Registration start");
             if (await CheckIsUserRegistered(request))
-                return BadRequest(Result.UserExists);
+                return BadRequest(Result.From(DefaultResource.UserExists));
 
             var user = _mapper.Map<ApplicationUser>(request);
             user.SignUpDate = DateTime.UtcNow;
@@ -63,14 +64,14 @@ namespace Api.Endpoints.Registration
             user.ProfilePictureUrl = await _fileSystem.SavePictureAsync(file.FileName, file.ToArray(), FOLDER);
             
             var student = await _registrationService.GetUnregisteredStudentAsync(request.StudentNumber, request.StudentPassword);
-            if (student == null) return BadRequest(Result.RegisterError);
+            if (student == null) return BadRequest(Result.From(DefaultResource.RegisterError));
 
             user.Firstname = student.Firstname;
             user.Lastname = student.Lastname;
 
             user.Students.Add(student);
             var result = await _userManager.CreateAsync(user, request.Password);
-            if (!result.Succeeded) return BadRequest(Result.RegisterError);
+            if (!result.Succeeded) return BadRequest(Result.From(DefaultResource.RegisterError));
             
             await _userManager.AddToRolesAsync(user, new[] {RoleConstants.USER, RoleConstants.STUDENT});
             
@@ -85,7 +86,7 @@ namespace Api.Endpoints.Registration
             stopWatch.Stop();
             _logger.LogWarning("Registration end. {Milliseconds} ms elapsed", stopWatch.Elapsed.Milliseconds);
 
-            return Ok(Result.RegisterSuccess);
+            return Ok(Result.From(DefaultResource.RegisterSuccess));
         }
 
         private async Task<bool> CheckIsUserRegistered(Request.Register request)

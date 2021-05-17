@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Core.Entities
 {
@@ -15,21 +16,19 @@ namespace Core.Entities
         
         public DateTime UpdatedAt { get; set; }
 
-        public int LikesCount => PostLikes.Count;
+        public int LikesCount => PostLikes.Distinct().Count();
 
-        public int CommentsCount => PostComments.Count;
+        public int CommentsCount => Comments.Distinct().Count();
 
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
-
+        
         public List<PostPicture> Pictures { get; set; } = new();
-
-        public List<Comment> Comments { get; set; } = new();
-        public List<PostComment> PostComments { get; set; } = new();
-
+        
         public List<PostLike> PostLikes { get; set; } = new();
-
+        
+        public List<Comment> Comments { get; set; } = new();
+        
         public List<Tag> Tags { get; set; } = new();
-        public List<PostTag> PostTags { get; set; } = new();
     }
 }

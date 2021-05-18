@@ -60,7 +60,7 @@ namespace Api.Endpoints.Registration
             var user = _mapper.Map<ApplicationUser>(request);
             user.SignUpDate = DateTime.UtcNow;
             var file = request.ProfilePicture;
-            user.ProfilePictureUrl = await _fileSystem.SavePictureAsync(file.FileName, file.ToArray(), FOLDER);
+            user.ProfilePictureUrl = await _fileSystem.SavePictureAsync(file?.FileName, file?.ToArray(), FOLDER);
             
             var student = await _registrationService.GetUnregisteredStudentAsync(request.StudentNumber, request.StudentPassword);
             if (student == null) return BadRequest(Result.From(Resource.RegisterError));

@@ -14,6 +14,7 @@ namespace Common.Extensions
 
         private static bool IsExtensionValid(string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName)) return false;
             var extension = Path.GetExtension(fileName);
 
             return string.Equals(extension, ".jpg", StringComparison.OrdinalIgnoreCase) ||

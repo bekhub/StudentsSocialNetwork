@@ -66,8 +66,7 @@ namespace Api.Services
                 .ToList();
             fullPaths.ForEach(x =>
             {
-                if (File.Exists(x))
-                    File.Delete(x);
+                if (File.Exists(x)) File.Delete(x);
             });
         }
 

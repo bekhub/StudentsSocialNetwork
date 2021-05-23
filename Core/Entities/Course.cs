@@ -12,6 +12,8 @@ namespace Core.Entities
         public int Theory { get; set; }
         
         public int Practice { get; set; }
+
+        public int Total => Theory + Practice;
         
         public int Credits { get; set; }
         

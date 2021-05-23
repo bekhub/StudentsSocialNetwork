@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using Api.Configuration;
+using Api.Helpers;
 using Core.Interfaces.Services;
-using Core.ObisApiModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -49,9 +49,10 @@ namespace Api.Controllers
         }
 
         [HttpGet("wake-up")]
-        public Task<WakeUp.Response> WakeUp()
+        public async Task<Result> WakeUp()
         {
-            return _obisApiService.WakeUpAsync();
+            var response = await _obisApiService.WakeUpAsync();
+            return Result.From(response.Message);
         }
     }
 }

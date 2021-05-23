@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Configuration;
+using Api.Helpers;
+using Api.Resources;
 using Ardalis.ApiEndpoints;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
-using Infrastructure.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -31,20 +33,21 @@ namespace Api.Endpoints.Auth
             Description = "Provide refresh token. Requires authorization",
             OperationId = "auth.revokeToken",
             Tags = new[] { "Auth.SignIn" })]
+        [SwaggerResponse((int)HttpStatusCode.OK, null, typeof(Result))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, null, typeof(Result))]
         public override async Task<ActionResult> HandleAsync(string token, CancellationToken cancellationToken = new())
         {
-            if (string.IsNullOrEmpty(token)) return BadRequest("Token is required");
+            if (string.IsNullOrEmpty(token)) return Result.BadRequest(Resource.TokenRequired);
             var user = await _userAccessor.GetCurrentUserAsync(cancellationToken);
-            if (!user.OwnsToken(token) && !User.IsInRole(RoleConstants.ADMINISTRATOR))
-                return Unauthorized("Invalid token");
-
             var refreshToken = user.GetRefreshToken(token);
             
+            if (refreshToken == null) return Result.BadRequest(Resource.TokenInvalid);
+
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.RevokedByIp = _userAccessor.GetIpAddress();
             await _userRepository.UpdateAsync(user);
 
-            return Ok("Token revoked");
+            return Result.Ok(Resource.TokenRevoked);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Api.Endpoints.StudentAccount
                 .ForMember(x => x.ProfilePictureUrl, 
                     expression => expression.MapFrom(x => x.User.ProfilePictureUrl))
                 .ForMember(x => x.Birthdate,
-                    expression => expression.MapFrom(x => x.BirthDate))
+                    expression => expression.MapFrom(x => $"{x.BirthDate:dd.MM.yyyy}"))
                 .ForMember(x => x.Department,
                     expression => expression.MapFrom(x => x.Department.Name))
                 .ForMember(x => x.Faculty, 

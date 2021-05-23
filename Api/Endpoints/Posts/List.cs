@@ -34,8 +34,8 @@ namespace Api.Endpoints.Posts
         [JwtAuthorize]
         [HttpGet("api/posts")]
         [SwaggerOperation(
-            Summary = "Show all posts",
-            Description = "Show all posts",
+            Summary = "List of posts",
+            Description = "List of posts",
             OperationId = "posts.list",
             Tags = new []{"Posts"})]
         public override async Task<ActionResult<List<Response.List>>> HandleAsync([FromQuery] Request.List request, 

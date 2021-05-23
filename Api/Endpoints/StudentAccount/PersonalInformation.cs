@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Api.Configuration;
 using Ardalis.ApiEndpoints;
@@ -34,6 +36,7 @@ namespace Api.Endpoints.StudentAccount
             Description = "Student's personal information",
             OperationId = "studentAccount.personalInformation",
             Tags = new[] { "StudentAccount" })]
+        [SwaggerResponse((int)HttpStatusCode.OK, null, typeof(List<Response.PersonalInformation>))]
         public override async Task<ActionResult<Response.PersonalInformation>> HandleAsync(CancellationToken cancellationToken = new())
         {
             var userId = _currentUserAccessor.GetCurrentUserId();

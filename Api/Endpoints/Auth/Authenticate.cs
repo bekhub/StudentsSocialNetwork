@@ -1,5 +1,8 @@
-﻿using System.Threading;
+﻿using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using Api.Helpers;
+using Api.Resources;
 using Ardalis.ApiEndpoints;
 using Core.Entities;
 using Core.Interfaces;
@@ -42,12 +45,14 @@ namespace Api.Endpoints.Auth
             Description = "Authenticates the user",
             OperationId = "auth.authenticate",
             Tags = new[] { "Auth.SignIn" })]
+        [SwaggerResponse((int)HttpStatusCode.OK, null, typeof(Response.Authenticate))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, null, typeof(Result))]
         public override async Task<ActionResult<Response.Authenticate>> HandleAsync(Request.Authenticate request, 
             CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrEmpty(request.Username) && !string.IsNullOrEmpty(request.StudentNumber) || 
                 string.IsNullOrEmpty(request.Username) && string.IsNullOrEmpty(request.StudentNumber))
-                return BadRequest("Please provide one of two: either the username or student number");
+                return Result.BadRequest(Resource.UsernameOrStudentNumber);
             
             ApplicationUser user;
             if (string.IsNullOrEmpty(request.Username))
@@ -57,11 +62,11 @@ namespace Api.Endpoints.Auth
             }
             else user = await _userRepository.GetByUsernameAsync(request.Username);
 
-            if (user == null) return Unauthorized();
+            if (user == null) return Result.BadRequest(Resource.UserNotFound);
             
             var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, false);
 
-            if (!result.Succeeded) return Unauthorized();
+            if (!result.Succeeded) return Result.BadRequest(Resource.PasswordInvalid);
 
             var (jwtToken, jwtExpires) = await _jwtFactory.CreateTokenAsync(user.Id, user.Email);
             var refreshToken = _jwtFactory.CreateRefreshToken(_userAccessor.GetIpAddress());

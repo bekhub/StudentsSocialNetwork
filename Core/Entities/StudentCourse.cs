@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Core.Enums;
 using Core.Interfaces;
 
 namespace Core.Entities
@@ -22,6 +23,8 @@ namespace Core.Entities
 
         public string AverageAssessment { get; set; }
 
+        public string Teacher { get; set; }
+
         public int StudentId { get; set; }
         public Student Student { get; set; }
 
@@ -39,11 +42,5 @@ namespace Core.Entities
             if (coursesPerWeek == 0) return 0;
             return (float) absent * 100 / (16 * coursesPerWeek);
         }
-    }
-
-    public enum Semester
-    {
-        First = 1,
-        Second = 2,
     }
 }

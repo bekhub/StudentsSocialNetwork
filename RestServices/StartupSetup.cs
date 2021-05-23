@@ -12,6 +12,7 @@ namespace RestServices
         public static void AddRestApiServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IObisApiService, ObisApiService>();
+            services.AddScoped<ITimetableApiService, TimetableApiService>();
             services.AddScoped<HttpClient>();
             services.AddScoped<BaseHttpService>();
             services.Configure<ObisApiSettings>(configuration.GetSection(nameof(ObisApiSettings)));

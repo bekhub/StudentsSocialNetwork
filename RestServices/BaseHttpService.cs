@@ -77,7 +77,12 @@ namespace RestServices
 
         private static async Task<T> FromHttpResponseMessage<T>(HttpResponseMessage result)
         {
-            return JsonSerializer.Deserialize<T>(await result.Content.ReadAsStringAsync(), new JsonSerializerOptions
+            return Deserialize<T>(await result.Content.ReadAsStringAsync());
+        }
+
+        protected static T Deserialize<T>(string json)
+        {
+            return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
             });

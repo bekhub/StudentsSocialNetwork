@@ -17,7 +17,7 @@ namespace FunctionalTests.Controllers
         [Fact]
         public async Task ReturnsVersionAndLastUpdateDate()
         {
-            var response = await _client.GetAsync("/info");
+            var response = await _client.GetAsync("/meta/info");
             response.EnsureSuccessStatusCode();
             var stringResponse = await response.Content.ReadAsStringAsync();
 

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
 using Api;
+using Core.Entities;
 using Infrastructure.Data;
+using Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +33,8 @@ namespace FunctionalTests
             {
                 var scopedServices = scope.ServiceProvider;
                 var db = scopedServices.GetRequiredService<SsnDbContext>();
+                var userManager = scopedServices.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = scopedServices.GetRequiredService<RoleManager<IdentityRole>>();
 
                 var logger = scopedServices
                     .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
@@ -40,6 +45,7 @@ namespace FunctionalTests
                 try
                 {
                     // Seed the database with test data.
+                    IdentityDbContextSeed.SeedAsync(userManager, roleManager, db);
                     SeedData.PopulateTestData(db);
                 }
                 catch (Exception ex)
@@ -58,7 +64,6 @@ namespace FunctionalTests
                 .UseSolutionRelativeContentRoot("Api/")
                 .ConfigureServices(services =>
                 {
-                    // Remove the app's ApplicationDbContext registration.
                     var descriptor = services.SingleOrDefault(
                         d => d.ServiceType ==
                             typeof(DbContextOptions<SsnDbContext>));
@@ -67,26 +72,10 @@ namespace FunctionalTests
                     {
                         services.Remove(descriptor);
                     }
-
-                    // Add ApplicationDbContext using an in-memory database for testing.
                     services.AddDbContext<SsnDbContext>(options =>
                     {
                         options.UseInMemoryDatabase("InMemoryDbForTesting");
                     });
-
-                    //// Create a new service provider.
-                    //var serviceProvider = new ServiceCollection()
-                    //    .AddEntityFrameworkInMemoryDatabase()
-                    //    .BuildServiceProvider();
-
-                    //// Add a database context (SsnContext) using an in-memory
-                    //// database for testing.
-                    //services.AddDbContext<SsnContext>(options =>
-                    //{
-                    //    options.UseInMemoryDatabase("InMemoryDbForTesting");
-                    //    options.UseInternalServiceProvider(serviceProvider);
-                    //});
-
                     services.AddScoped<IMediator, NoOpMediator>();
                 });
         }

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Api.Helpers.Extensions;
 using Api.Services;
-using Common.Extensions;
 using Core.Entities;
 using Core.Interfaces;
 using Core.Interfaces.Services;
 using Core.ObisApiModels;
 using Infrastructure.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Endpoints.Registration
@@ -19,16 +16,14 @@ namespace Api.Endpoints.Registration
         private readonly IFireAndForgetHandler _fireAndForgetHandler;
         private readonly IObisApiService _obisApiService;
         private readonly IEncryptionService _encryptionService;
-        private readonly IFileSystem _fileSystem;
 
         public RegistrationService(SsnDbContext context, IObisApiService obisApiService,
-            IEncryptionService encryptionService, IFireAndForgetHandler fireAndForgetHandler, IFileSystem fileSystem)
+            IEncryptionService encryptionService, IFireAndForgetHandler fireAndForgetHandler)
         {
             _context = context;
             _obisApiService = obisApiService;
             _encryptionService = encryptionService;
             _fireAndForgetHandler = fireAndForgetHandler;
-            _fileSystem = fileSystem;
         }
 
         public async Task<bool> CheckStudentAsync(string studentNumber, string studentPassword)
@@ -102,18 +97,6 @@ namespace Api.Endpoints.Registration
                 Name = departmentName,
                 Institute = await GetInstituteAsync(instituteName),
             };
-        }
-        
-        public async Task<string> MakePictureUrlAsync(IFormFile file, string folder)
-        {
-            if (file is not {Length: > 0}) return string.Empty;
-
-            var picName = file.FileName.GeneratePictureName();
-            var picture = file.ToArray();
-
-            var pictureUrl = await _fileSystem.SavePictureAsync(picName, picture, folder);
-
-            return pictureUrl ?? string.Empty;
         }
 
         private static string GetStudentEmail(string studentNumber)

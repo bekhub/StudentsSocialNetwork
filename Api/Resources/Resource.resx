@@ -96,4 +96,19 @@
     <data name="NestingError" xml:space="preserve">
         <value>Multiple nesting is not allowed</value>
     </data>
+    <data name="PasswordInvalid" xml:space="preserve">
+        <value>Invalid password</value>
+    </data>
+    <data name="TokenRequired" xml:space="preserve">
+        <value>Token is required</value>
+    </data>
+    <data name="TokenInvalid" xml:space="preserve">
+        <value>Token is invalid</value>
+    </data>
+    <data name="TokenRevoked" xml:space="preserve">
+        <value>Token revoked</value>
+    </data>
+    <data name="UsernameOrStudentNumber" xml:space="preserve">
+        <value>Please provide one of two: either the username or student number</value>
+    </data>
 </root>

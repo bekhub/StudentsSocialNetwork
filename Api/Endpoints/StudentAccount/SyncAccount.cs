@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Api.Configuration;
 using Ardalis.ApiEndpoints;
@@ -30,6 +31,8 @@ namespace Api.Endpoints.StudentAccount
             Description = "Synchronize student's account",
             OperationId = "studentAccount.syncAccount",
             Tags = new[] { "StudentAccount" })]
+        [SwaggerResponse((int)HttpStatusCode.OK)]
+        [SwaggerResponse((int)HttpStatusCode.Unauthorized)]
         public override async Task<ActionResult> HandleAsync(CancellationToken cancellationToken = new())
         {
             var userId = _userAccessor.GetCurrentUserId();

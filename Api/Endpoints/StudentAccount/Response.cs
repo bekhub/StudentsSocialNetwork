@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Api.Endpoints.StudentAccount
 {
@@ -17,7 +16,7 @@ namespace Api.Endpoints.StudentAccount
 
             public string Email { get; set; }
 
-            public DateTime? Birthdate { get; set; }
+            public string Birthdate { get; set; }
 
             public string Department { get; set; }
 
@@ -49,5 +48,26 @@ namespace Api.Endpoints.StudentAccount
             
             public int Point { get; set; }
         }
+        
+        public class Timetable
+        {
+            public Weekday Weekday { get; set; }
+
+            public string Code { get; set; }
+
+            public string Name { get; set; }
+            
+            public string TimeFrom { get; set; }
+            
+            public string TimeTo { get; set; }
+            
+            public string Teacher { get; set; }
+            
+            public string Classroom { get; set; }
+
+            public bool? IsMandatory { get; set; }
+        }
+
+        public record Weekday(int Value, string Name);
     }
 }

@@ -169,6 +169,15 @@ namespace Api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid password.
+        /// </summary>
+        internal static string PasswordInvalid {
+            get {
+                return ResourceManager.GetString("PasswordInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Password has been updated.
         /// </summary>
         internal static string PasswordUpdated {
@@ -268,6 +277,33 @@ namespace Api.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Token is invalid.
+        /// </summary>
+        internal static string TokenInvalid {
+            get {
+                return ResourceManager.GetString("TokenInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Token is required.
+        /// </summary>
+        internal static string TokenRequired {
+            get {
+                return ResourceManager.GetString("TokenRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Token revoked.
+        /// </summary>
+        internal static string TokenRevoked {
+            get {
+                return ResourceManager.GetString("TokenRevoked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authorization required.
         /// </summary>
         internal static string UnAuthorized {
@@ -282,6 +318,15 @@ namespace Api.Resources {
         internal static string UserExists {
             get {
                 return ResourceManager.GetString("UserExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please provide one of two: either the username or student number.
+        /// </summary>
+        internal static string UsernameOrStudentNumber {
+            get {
+                return ResourceManager.GetString("UsernameOrStudentNumber", resourceCulture);
             }
         }
         

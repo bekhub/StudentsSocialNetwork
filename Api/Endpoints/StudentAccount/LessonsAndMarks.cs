@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Configuration;
@@ -36,6 +37,7 @@ namespace Api.Endpoints.StudentAccount
             Description = "Student's lessons and marks",
             OperationId = "studentAccount.lessonAndMarks",
             Tags = new[] { "StudentAccount" })]
+        [SwaggerResponse((int)HttpStatusCode.OK, null, typeof(List<Response.LessonsAndMarks>))]
         public override async Task<ActionResult<List<Response.LessonsAndMarks>>> HandleAsync(CancellationToken cancellationToken = new())
         {
             var userId = _currentUserAccessor.GetCurrentUserId();

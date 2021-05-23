@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Api.Helpers;
+using Api.Resources;
 using Ardalis.ApiEndpoints;
 using Core.Interfaces;
 using Core.Interfaces.Repositories;
@@ -36,12 +39,14 @@ namespace Api.Endpoints.Auth
             Description = "Provide refresh token",
             OperationId = "auth.refreshToken",
             Tags = new[] { "Auth.SignIn" })]
+        [SwaggerResponse((int)HttpStatusCode.OK, null, typeof(Response.Authenticate))]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, null, typeof(Result))]
         public override async Task<ActionResult<Response.Authenticate>> HandleAsync(string token, 
             CancellationToken cancellationToken = new())
         {
-            if (string.IsNullOrEmpty(token)) return BadRequest("Token is required");
+            if (string.IsNullOrEmpty(token)) return Result.BadRequest(Resource.TokenRequired);
             var (user, refreshToken) = await _userRepository.GetByRefreshTokenAsync(token, cancellationToken);
-            if (user == null || !refreshToken.IsActive) return Unauthorized("Invalid token");
+            if (user == null || !refreshToken.IsActive) return Result.BadRequest(Resource.TokenInvalid);
 
             var ipAddress = _userAccessor.GetIpAddress();
             var newRefreshToken = _jwtFactory.CreateRefreshToken(ipAddress);
@@ -60,8 +65,8 @@ namespace Api.Endpoints.Auth
                 UserId = user.Id,
                 JwtToken = jwtToken,
                 JwtExpires = jwtExpires,
-                RefreshToken = refreshToken.Token,
-                RefreshExpires = refreshToken.Expires,
+                RefreshToken = newRefreshToken.Token,
+                RefreshExpires = newRefreshToken.Expires,
             };
         }
     }

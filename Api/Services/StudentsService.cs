@@ -79,7 +79,7 @@ namespace Api.Services
                 var lesson = semesterNotes.GetLessonByCodeAndName(model.Code, model.Name);
                 var assessments = await GetAssessmentsAsync(lesson, studentId);
                 var studentCourse = await GetStudentCourseAsync(model, assessments, studentId);
-                studentCourse.AverageAssessment = lesson?.Exams.FirstOrDefault(x => string.IsNullOrEmpty(x.Avg))?.Avg;
+                studentCourse.AverageAssessment = lesson?.Exams.FirstOrDefault(x => !string.IsNullOrEmpty(x.Avg))?.Avg;
                 studentCourses.Add(studentCourse);
             }
 

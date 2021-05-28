@@ -27,7 +27,7 @@ namespace Api.Endpoints.UserAccount
         }
 
         [JwtAuthorize(RoleConstants.USER)]
-        [HttpGet("api/change-password")]
+        [HttpPut("api/change-password")]
         [SwaggerOperation(
             Summary = "Change user's password",
             Description = "Change user's password",

@@ -99,7 +99,8 @@ namespace Api.Endpoints.StudentAccount
                 .Include(x => x.Student)
                 .Where(x => x.Student.UserId == userId && 
                             x.AcademicYear == StudentCourse.CurrentAcademicYear &&
-                            x.Semester == StudentCourse.CurrentSemester)
+                            x.Semester == StudentCourse.CurrentSemester &&
+                            x.Course.Theory + x.Course.Practice > 0)
                 .AsNoTracking().ToList();
             
             var courses = new Stack<StudentCourse>(studentCourses);

@@ -32,7 +32,7 @@ namespace Api.Endpoints.StudentAccount
         }
 
         [JwtAuthorize(RoleConstants.STUDENT)]
-        [HttpPost("api/change-student-password")]
+        [HttpPut("api/change-student-password")]
         [SwaggerOperation(
             Summary = "Change student's password",
             Description = "Change student's password, that is used to access 'obis.manas.edu.kg'",

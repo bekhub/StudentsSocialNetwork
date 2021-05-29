@@ -33,10 +33,18 @@ namespace Api.Endpoints.Posts
                 .IncludeBase<Post, Response.Create>();
 
             CreateMap<Post, Response.Details>(MemberList.None)
-                .IncludeBase<Post, Response.Create>();
+                .IncludeBase<Post, Response.Create>()
+                .ForMember(x => x.UserPictureUrl, 
+                    expression => expression.MapFrom(x => x.User.ProfilePictureUrl));
+            
+            CreateMap<PostLike, Response.Likes>(MemberList.None)
+                .ForMember(x => x.Username, 
+                    expression => expression.MapFrom(x => x.User.UserName))
+                .ForMember(x => x.ProfilePictureUrl, 
+                    expression => expression.MapFrom(x => x.User.ProfilePictureUrl));
             
             CreateMap<Post, Response.List>(MemberList.None)
-                .IncludeBase<Post, Response.Create>();
+                .IncludeBase<Post, Response.Details>();
         }
     }
 }

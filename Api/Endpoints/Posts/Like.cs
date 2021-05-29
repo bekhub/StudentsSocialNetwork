@@ -17,7 +17,7 @@ namespace Api.Endpoints.Posts
 {
     public class Like : BaseAsyncEndpoint
         .WithRequest<Request.Like>
-        .WithResponse<Result>
+        .WithResponse<Response.Like>
     {
         private readonly ICurrentUserAccessor _currentUserAccessor;
         private readonly SsnDbContext _context;
@@ -35,7 +35,7 @@ namespace Api.Endpoints.Posts
             Description = "Like post",
             OperationId = "posts.like",
             Tags = new[] {"Posts"})]
-        public override async Task<ActionResult<Result>> HandleAsync(Request.Like request,
+        public override async Task<ActionResult<Response.Like>> HandleAsync(Request.Like request,
             CancellationToken cancellationToken = new())
         {
             var userId = _currentUserAccessor.GetCurrentUserId();
@@ -43,16 +43,21 @@ namespace Api.Endpoints.Posts
                 .Include(x => x.PostLikes)
                 .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-            if (post == null) return BadRequest(Result.From(Resource.PostNotFound));
+            if (post == null) return Result.BadRequest(Resource.PostNotFound);
 
             var postLike = post.PostLikes.SingleOrDefault(x => x.UserId == userId);
 
-            if (postLike == null) post.PostLikes.Add(new PostLike {Post = post, UserId = userId});
-            else post.PostLikes.Remove(postLike);
+            if (postLike == null)
+            {
+                postLike = new PostLike {Post = post, UserId = userId, IsLiked = true};
+                post.PostLikes.Add(postLike);
+            }
+            else postLike.IsLiked = !postLike.IsLiked;
+            
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Result.From(Resource.PostLikeSuccess);
+            return new Response.Like(postLike.IsLiked);
         }
     }
 }

@@ -50,5 +50,7 @@ namespace Api.Endpoints.Posts
         public record Details(int Id);
 
         public record Like(int Id);
+
+        public record Likes(int PostId);
     }
 }

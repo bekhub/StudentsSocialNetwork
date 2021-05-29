@@ -16,9 +16,9 @@ namespace Core.Entities
         
         public DateTime UpdatedAt { get; set; }
 
-        public int LikesCount => PostLikes.Distinct().Count();
+        public int LikesCount => PostLikes.Count(x => x.IsLiked);
 
-        public int CommentsCount => Comments.Distinct().Count();
+        public int CommentsCount => Comments.SelectMany(x => x.Replies).Count() + Comments.Count;
 
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
@@ -30,5 +30,7 @@ namespace Core.Entities
         public List<Comment> Comments { get; set; } = new();
         
         public List<Tag> Tags { get; set; } = new();
+
+        public bool IsUserLikedPost(string userId) => PostLikes.Any(x => x.UserId == userId && x.IsLiked);
     }
 }

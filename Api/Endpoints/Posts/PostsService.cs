@@ -33,6 +33,7 @@ namespace Api.Endpoints.Posts
                 .Include(x => x.User)
                 .Include(x => x.PostLikes)
                 .Include(x => x.Comments)
+                    .ThenInclude(x => x.Replies)
                 .AsNoTracking();
         }
 

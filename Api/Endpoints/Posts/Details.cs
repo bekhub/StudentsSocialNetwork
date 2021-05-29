@@ -6,7 +6,7 @@ using Api.Helpers;
 using Api.Resources;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using Core.Interfaces.Services;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +19,14 @@ namespace Api.Endpoints.Posts
         .WithResponse<Response.Details>
     {
         private readonly SsnDbContext _context;
+        private readonly ICurrentUserAccessor _currentUserAccessor;
         private readonly IMapper _mapper;
 
-        public Details(SsnDbContext context, IMapper mapper)
+        public Details(SsnDbContext context, IMapper mapper, ICurrentUserAccessor currentUserAccessor)
         {
             _context = context;
             _mapper = mapper;
+            _currentUserAccessor = currentUserAccessor;
         }
         
         [JwtAuthorize]
@@ -43,12 +45,16 @@ namespace Api.Endpoints.Posts
                 .Include(x => x.User)
                 .Include(x => x.PostLikes)
                 .Include(x => x.Comments)
-                .ProjectTo<Response.Details>(_mapper.ConfigurationProvider)
+                    .ThenInclude(x => x.Replies)
                 .SingleOrDefaultAsync(cancellationToken);
             
             if (post == null) return BadRequest(Result.From(Resource.PostNotFound));
+            
+            var userId = _currentUserAccessor.GetCurrentUserId();
+            var details = _mapper.Map<Response.Details>(post);
+            details.IsCurrentUserLiked = post.IsUserLikedPost(userId);
 
-            return post;
+            return details;
         }
     }
 }

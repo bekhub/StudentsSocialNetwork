@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers
 {
     [ApiController]
-    [Route("meta")]
+    [Route("api/meta")]
     public class MetaController : ControllerBase
     {
         private readonly ICurrentUserAccessor _userAccessor;

@@ -2,6 +2,8 @@
 {
     public class PostLike
     {
+        public bool IsLiked { get; set; }
+        
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
         

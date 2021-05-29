@@ -6,10 +6,10 @@ using Api.Configuration;
 using Ardalis.ApiEndpoints;
 using AutoMapper;
 using Core.Entities;
+using Core.Interfaces.Services;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Endpoints.Posts
@@ -19,16 +19,19 @@ namespace Api.Endpoints.Posts
         .WithResponse<List<Response.List>>
     {
         private readonly SsnDbContext _context;
+        private readonly ICurrentUserAccessor _currentUserAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly PostsService _service;
         private readonly IMapper _mapper;
 
-        public List(SsnDbContext context, IMapper mapper, PostsService service, UserManager<ApplicationUser> userManager)
+        public List(SsnDbContext context, IMapper mapper, PostsService service, 
+            UserManager<ApplicationUser> userManager, ICurrentUserAccessor currentUserAccessor)
         {
             _context = context;
             _mapper = mapper;
             _service = service;
             _userManager = userManager;
+            _currentUserAccessor = currentUserAccessor;
         }
         
         [JwtAuthorize]
@@ -57,13 +60,20 @@ namespace Api.Endpoints.Posts
                 else return default;
             }
             
-            var posts = await query
+            var currentUserId = _currentUserAccessor.GetCurrentUserId();
+            var posts = query
                 .OrderByDescending(x => x.CreatedAt)
                 .Skip(request.Offset ?? 0)
-                .Take(request.Limit ?? 30)
+                .Take(request.Limit ?? 20)
+                .AsEnumerable()
                 // Ошибка при использовании ProjectTo: удваивает значение LikesCount
-                .Select(x => _mapper.Map<Response.List>(x))
-                .ToListAsync(cancellationToken);
+                .Select(x =>
+                {
+                    var model = _mapper.Map<Response.List>(x);
+                    model.IsCurrentUserLiked = x.IsUserLikedPost(currentUserId);
+                    return model;
+                })
+                .ToList();
 
             return posts;
         }

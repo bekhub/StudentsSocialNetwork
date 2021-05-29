@@ -32,7 +32,6 @@ namespace Api.Endpoints.StudentAccount
             OperationId = "studentAccount.syncAccount",
             Tags = new[] { "StudentAccount" })]
         [SwaggerResponse((int)HttpStatusCode.OK)]
-        [SwaggerResponse((int)HttpStatusCode.Unauthorized)]
         public override async Task<ActionResult> HandleAsync(CancellationToken cancellationToken = new())
         {
             var userId = _userAccessor.GetCurrentUserId();

@@ -17,7 +17,7 @@ namespace Api.Endpoints.Comments
             CreateMap<Comment, Response.ListComment>(MemberList.None)
                 .ForMember(x => x.Username,
                     expression => expression.MapFrom(x => x.User.UserName))
-                .ForMember(x => x.UserProfile,
+                .ForMember(x => x.ProfilePictureUrl,
                     expression => expression.MapFrom(x => x.User.ProfilePictureUrl))
                 .ForMember(x => x.Replies, expression => expression.Ignore());
         }

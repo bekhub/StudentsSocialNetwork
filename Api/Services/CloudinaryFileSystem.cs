@@ -28,33 +28,33 @@ namespace Api.Services
         public string SavePicture(string pictureName, byte[] picture, string folder = "")
         {
             if (!picture.IsValidImage(pictureName)) return null;
-            pictureName = pictureName.GeneratePictureName();
-            
+
             using var stream = new MemoryStream(picture);
-            var uploadParams = new ImageUploadParams
-            {
-                Folder = folder,
-                PublicId = Path.GetFileNameWithoutExtension(pictureName),
-                File = new FileDescription(pictureName, stream),
-            };
-            var uploadResult = _cloudinary.Upload(uploadParams);
+            var uploadResult = _cloudinary.Upload(GetUploadParams(pictureName, stream, folder));
             return uploadResult.Url.ToString();
         }
 
         public async Task<string> SavePictureAsync(string pictureName, byte[] picture, string folder = "")
         {
             if (!picture.IsValidImage(pictureName)) return null;
+
+            await using var stream = new MemoryStream(picture);
+            var uploadResult = await _cloudinary.UploadAsync(GetUploadParams(pictureName, stream, folder));
+            return uploadResult.Url.ToString();
+        }
+
+        private static ImageUploadParams GetUploadParams(string pictureName, Stream picture, string folder)
+        {
             pictureName = pictureName.GeneratePictureName();
             
-            await using var stream = new MemoryStream(picture);
             var uploadParams = new ImageUploadParams
             {
                 Folder = folder,
                 PublicId = Path.GetFileNameWithoutExtension(pictureName),
-                File = new FileDescription(pictureName, stream),
+                File = new FileDescription(pictureName, picture),
+                Transformation = new Transformation().Quality("auto").FetchFormat("auto"),
             };
-            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-            return uploadResult.Url.ToString();
+            return uploadParams;
         }
 
         public void DeletePicture(string pictureUrl, string folder = "")

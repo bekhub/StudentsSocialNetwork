@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Core.Entities;
+using Core.ObisApiModels;
 
 namespace Api.Endpoints.StudentAccount
 {
@@ -34,6 +35,22 @@ namespace Api.Endpoints.StudentAccount
             CreateMap<Assessment, Response.Mark>(MemberList.None)
                 .ForMember(x => x.Name,
                     expression => expression.MapFrom(x => x.Type));
+
+            CreateMap<StudentCourse, StudentTakenLessons.Response>(MemberList.None)
+                .ForMember(x => x.Code,
+                    expression => expression.MapFrom(x => x.Course.Code))
+                .ForMember(x => x.Name,
+                    expression => expression.MapFrom(x => x.Course.Name))
+                .ForMember(x => x.Credit,
+                    expression => expression.MapFrom(x => x.Course.Credits))
+                .ForMember(x => x.Theory,
+                    expression => expression.MapFrom(x => x.Course.Theory))
+                .ForMember(x => x.Practice,
+                    expression => expression.MapFrom(x => x.Course.Practice))
+                .ForMember(x => x.TheoryAbsent,
+                    expression => expression.MapFrom(x => x.TheoryAbsent))
+                .ForMember(x => x.PracticeAbsent,
+                    expression => expression.MapFrom(x => x.PracticeAbsent));
         }
     }
 }

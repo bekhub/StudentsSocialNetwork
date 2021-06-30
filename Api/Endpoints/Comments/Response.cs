@@ -13,6 +13,8 @@ namespace Api.Endpoints.Comments
 
             public string Username { get; set; }
             
+            public string UserProfile { get; set; }
+            
             public string Body { get; set; }
 
             public int LikesCount { get; set; }

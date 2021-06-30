@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Common.Exceptions;
 using Common.Extensions;
 using Core.Entities;
@@ -19,14 +20,16 @@ namespace Api.Services
         private readonly IObisApiService _obisApiService;
         private readonly ILogger<StudentsService> _logger;
         private readonly IEncryptionService _encryptionService;
+        private readonly IMapper _mapper;
 
         public StudentsService(SsnDbContext ssnDbContext, IObisApiService obisApiService,
-            IEncryptionService encryptionService, ILogger<StudentsService> logger)
+            IEncryptionService encryptionService, ILogger<StudentsService> logger, IMapper mapper)
         {
             _context = ssnDbContext;
             _obisApiService = obisApiService;
             _encryptionService = encryptionService;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task SynchronizeStudentCoursesAsync(string studentNumber)
@@ -69,9 +72,18 @@ namespace Api.Services
             await _context.SaveChangesAsync();
         }
 
-        private async Task<List<StudentCourse>> GetStudentCoursesAsync(IEnumerable<StudentTakenLessons.Response> models,
+        private async Task<List<StudentCourse>> GetStudentCoursesAsync(List<StudentTakenLessons.Response> models,
             int studentId)
         {
+            if (models == null || models.Count == 0)
+            {
+                models = await _context.StudentCourses
+                    .Include(x => x.Student)
+                    .Include(x => x.Course)
+                    .Where(x => x.Student.Id == studentId)
+                    .Select(x => _mapper.Map<StudentTakenLessons.Response>(x))
+                    .ToListAsync();
+            }
             var semesterNotes = await _obisApiService.StudentSemesterNotesAsync();
             var studentCourses = new List<StudentCourse>();
             foreach (var model in models)

@@ -75,16 +75,11 @@ namespace Api.Services
         private async Task<List<StudentCourse>> GetStudentCoursesAsync(List<StudentTakenLessons.Response> models,
             int studentId)
         {
-            if (models == null || models.Count == 0)
-            {
-                models = await _context.StudentCourses
-                    .Include(x => x.Student)
-                    .Include(x => x.Course)
-                    .Where(x => x.Student.Id == studentId)
-                    .Select(x => _mapper.Map<StudentTakenLessons.Response>(x))
-                    .ToListAsync();
-            }
             var semesterNotes = await _obisApiService.StudentSemesterNotesAsync();
+            if (models == null || models.Count == 0) models = semesterNotes.Lessons
+                .Select(x => _mapper.Map<StudentTakenLessons.Response>(x))
+                .ToList();
+            
             var studentCourses = new List<StudentCourse>();
             foreach (var model in models)
             {
@@ -107,18 +102,21 @@ namespace Api.Services
                     x.CourseId == course.Id &&
                     x.StudentId == studentId);
 
+            var theoryAbsent = model.TheoryAbsent.AsIntOrNull() ?? studentCourse.TheoryAbsent;
+            var practiceAbsent = model.PracticeAbsent.AsIntOrNull() ?? studentCourse.PracticeAbsent;
+
             if (studentCourse != null)
             {
-                studentCourse.TheoryAbsent = model.TheoryAbsent.AsIntOrZero();
-                studentCourse.PracticeAbsent = model.PracticeAbsent.AsIntOrZero();
+                studentCourse.TheoryAbsent = theoryAbsent;
+                studentCourse.PracticeAbsent = practiceAbsent;
                 studentCourse.Assessments = assessments;
                 return studentCourse;
             }
 
             return new StudentCourse
             {
-                TheoryAbsent = model.TheoryAbsent.AsIntOrZero(),
-                PracticeAbsent = model.PracticeAbsent.AsIntOrZero(),
+                TheoryAbsent = theoryAbsent,
+                PracticeAbsent = practiceAbsent,
                 AcademicYear = StudentCourse.CurrentAcademicYear,
                 Semester = StudentCourse.CurrentSemester,
                 Course = course,

@@ -105,23 +105,20 @@ namespace Api.Services
             var theoryAbsent = model.TheoryAbsent.AsIntOrNull() ?? studentCourse.TheoryAbsent;
             var practiceAbsent = model.PracticeAbsent.AsIntOrNull() ?? studentCourse.PracticeAbsent;
 
-            if (studentCourse != null)
-            {
-                studentCourse.TheoryAbsent = theoryAbsent;
-                studentCourse.PracticeAbsent = practiceAbsent;
-                studentCourse.Assessments = assessments;
-                return studentCourse;
-            }
-
-            return new StudentCourse
-            {
-                TheoryAbsent = theoryAbsent,
-                PracticeAbsent = practiceAbsent,
-                AcademicYear = StudentCourse.CurrentAcademicYear,
-                Semester = StudentCourse.CurrentSemester,
-                Course = course,
-                Assessments = assessments,
-            };
+            if (studentCourse == null) return new StudentCourse
+                {
+                    TheoryAbsent = theoryAbsent,
+                    PracticeAbsent = practiceAbsent,
+                    AcademicYear = StudentCourse.CurrentAcademicYear,
+                    Semester = StudentCourse.CurrentSemester,
+                    Course = course,
+                    Assessments = assessments,
+                };
+            
+            studentCourse.TheoryAbsent = theoryAbsent;
+            studentCourse.PracticeAbsent = practiceAbsent;
+            studentCourse.Assessments = assessments;
+            return studentCourse;
         }
 
         private async Task<List<Assessment>> GetAssessmentsAsync(StudentSemesterNotes.Lesson model, int studentId)

@@ -12,12 +12,12 @@ namespace Common.Extensions
 
         public static int AsIntOrZero(this string number)
         {
-            return string.IsNullOrEmpty(number) ? 0 : number.AsInt();
+            return !string.IsNullOrEmpty(number) && int.TryParse(number, out var parsed) ? parsed : 0;
         }
 
         public static int? AsIntOrNull(this string number)
         {
-            return string.IsNullOrEmpty(number) ? null : number.AsInt();
+            return !string.IsNullOrEmpty(number) && int.TryParse(number, out var parsed) ? parsed : null;
         }
         
         public static string GeneratePictureName(this string pictureName)
